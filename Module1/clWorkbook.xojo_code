@@ -18,6 +18,20 @@ Protected Class clWorkbook
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Function GetSheetNames() As string()
+		  var ret() as string
+		  
+		  for each sheet as clWorksheet in self.sheets
+		    ret.Add(sheet.Name)
+		    
+		  next
+		  
+		  return ret
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Sub LoadWorkbookInfo()
 		  
 		  var tmp as FolderItem = self.TempFolder
@@ -28,10 +42,10 @@ Protected Class clWorkbook
 		  var workbookxml as XMLDocument = new XMLDocument(tmp.Child("xl").child("workbook.xml"))
 		  
 		  var x1 as xmlnode = workbookxml.FirstChild
-		  var lvl as integer = 0
+		  var lvl1 as integer = 0
 		  
 		  while x1 <> nil 
-		    System.DebugLog(str(lvl)+":"+x1.name)
+		    System.DebugLog(str(lvl1)+":"+x1.name)
 		    
 		    if x1.name = "sheet" then
 		      var name as string = x1.GetAttribute("name")
@@ -39,18 +53,18 @@ Protected Class clWorkbook
 		      var rid as String = x1.GetAttribute("r:id")
 		      sheets.Add(new clWorksheet( self.TempFolder, name, sheetid.ToInteger))
 		      
-		      lvl =lvl
+		       
 		      
 		    end if
 		    
 		    // Navigate the tree
 		    if x1.name ="workbook" then 
 		      x1 = x1.FirstChild
-		      lvl = lvl+1
+		      lvl1 = lvl1+1
 		      
 		    elseif x1.name = "sheets" then
 		      x1 = x1.FirstChild
-		      lvl = lvl + 1
+		      lvl1 = lvl1 + 1
 		      
 		    else
 		      x1 = x1.NextSibling
@@ -59,6 +73,45 @@ Protected Class clWorkbook
 		    
 		  wend
 		  
+		  
+		  var sharedstringxml as XMLDocument = new XMLDocument(tmp.Child("xl").child("sharedStrings.xml"))
+		  
+		  var x2 as xmlnode = sharedstringxml.FirstChild
+		  var lvl2 as integer = 0
+		  var strCounter as integer
+		  
+		  while x2 <> nil 
+		    System.DebugLog(str(lvl2)+":"+x2.name)
+		    
+		    if x2.name = "si" then 
+		      
+		      var x3 as XMLNode = x2.FirstChild
+		       
+		      
+		      while sharedstrings.LastIndex < strCounter 
+		        SharedStrings.Add("??")
+		        
+		      wend
+		      
+		      SharedStrings(strCounter) = x3.FirstChild.Value
+		      strCounter = strCounter + 1
+		      
+		    end if
+		    
+		    if x2.name = "sst" then
+		      self.ExpectedStringUniqueCount = x2.GetAttribute("uniqueCount").ToInteger
+		      self.ExpectedStringCount = x2.GetAttribute("count").ToInteger
+		      
+		      x2 = x2.FirstChild
+		      
+		    else
+		      x2 = x2.NextSibling
+		      
+		    end if
+		    
+		  wend
+		  
+		  return
 		  
 		End Sub
 	#tag EndMethod
@@ -93,6 +146,18 @@ Protected Class clWorkbook
 		End Function
 	#tag EndMethod
 
+
+	#tag Property, Flags = &h0
+		ExpectedStringCount As Integer
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
+		ExpectedStringUniqueCount As Integer
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
+		SharedStrings() As String
+	#tag EndProperty
 
 	#tag Property, Flags = &h0
 		Sheets() As clWorksheet

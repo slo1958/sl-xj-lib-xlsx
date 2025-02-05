@@ -1,31 +1,43 @@
-#tag Module
-Protected Module Module1
+#tag Class
+Protected Class clWorkrow
 	#tag Method, Flags = &h0
-		Function findTestDataFolder() As FolderItem
-		  var fld as FolderItem
+		Sub AddCell(column as integer, cell as clCell)
 		  
-		  var upcount as integer = 15
-		  
-		  fld = App.ExecutableFile.parent
-		  
-		  while upcount > 0
-		    
-		    for each subfld as FolderItem in fld.Children
-		      
-		      if subfld.Name = "test_xlsx_data" and subfld.IsFolder then return subfld
-		      
-		    next
-		    
-		    fld = fld.Parent
-		    upcount = upcount - 1
+		  while cells.LastIndex <= column
+		    Cells.add nil
 		    
 		  wend
 		  
-		  return nil
+		  cells(column) = cell
 		  
+		  
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub Constructor(prmRow as integer)
+		  
+		  self.row = prmRow
+		  
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function GetCell(column as integer) As clCell
+		  
+		  return cells(column)
 		  
 		End Function
 	#tag EndMethod
+
+
+	#tag Property, Flags = &h0
+		cells() As clCell
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
+		row As Integer
+	#tag EndProperty
 
 
 	#tag ViewBehavior
@@ -69,6 +81,14 @@ Protected Module Module1
 			Type="Integer"
 			EditorType=""
 		#tag EndViewProperty
+		#tag ViewProperty
+			Name="cells()"
+			Visible=false
+			Group="Behavior"
+			InitialValue=""
+			Type="Integer"
+			EditorType=""
+		#tag EndViewProperty
 	#tag EndViewBehavior
-End Module
-#tag EndModule
+End Class
+#tag EndClass

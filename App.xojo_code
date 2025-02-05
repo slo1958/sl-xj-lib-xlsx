@@ -3,16 +3,28 @@ Protected Class App
 Inherits DesktopApplication
 	#tag Event
 		Sub Opening()
+		  var files() as string
+		  
+		  files.add("test_file_1.xlsx")
+		  files.add("test_file_2.xlsx")
+		  
+		  
 		  var fld as FolderItem = findTestDataFolder
 		  
-		  fld = fld.Child("test_file_1.xlsx")
+		  fld = fld.Child(files(1))
 		  
 		  if not fld.Exists then Return
 		  
-		  call PrepareXLSX(fld)
+		  self.loadedWorkbook = new Module1.clWorkbook(fld)
+		  
 		  
 		End Sub
 	#tag EndEvent
+
+
+	#tag Property, Flags = &h0
+		loadedWorkbook As Module1.clWorkbook
+	#tag EndProperty
 
 
 	#tag Constant, Name = kEditClear, Type = String, Dynamic = False, Default = \"&Delete", Scope = Public
