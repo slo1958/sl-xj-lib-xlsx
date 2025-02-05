@@ -52,10 +52,10 @@ Begin DesktopWindow Window1
       InitialValue    =   ""
       Italic          =   False
       Left            =   35
-      LockBottom      =   False
+      LockBottom      =   True
       LockedInPosition=   False
       LockLeft        =   True
-      LockRight       =   False
+      LockRight       =   True
       LockTop         =   True
       RequiresSelection=   False
       RowSelectionType=   0
@@ -104,9 +104,25 @@ End
 #tag EndDesktopWindow
 
 #tag WindowCode
+	#tag Method, Flags = &h0
+		Sub ShowSheet(sheetname as string)
+		  
+		  var sheet as Module1.clWorksheet
+		  
+		End Sub
+	#tag EndMethod
+
+
 #tag EndWindowCode
 
 #tag Events ListBox1
+	#tag Event
+		Sub Opening()
+		  
+		End Sub
+	#tag EndEvent
+#tag EndEvents
+#tag Events PopupMenu1
 	#tag Event
 		Sub Opening()
 		  
@@ -118,6 +134,37 @@ End
 		  
 		  me.SelectedRowIndex = 0
 		  
+		End Sub
+	#tag EndEvent
+	#tag Event
+		Sub SelectionChanged(item As DesktopMenuItem)
+		  
+		  var name as string = me.SelectedRowText
+		  
+		  var sheet as Module1.clWorksheet = app.loadedWorkbook.GetSheet(name)
+		  
+		  ListBox1.RemoveAllRows
+		  
+		  if sheet = nil then return
+		  
+		  listbox1.ColumnCount = sheet.lastColumn + 2
+		  
+		  for each row as Module1.clWorkrow in sheet.rows
+		    Listbox1.AddRow ""
+		    
+		    if row <> nil then
+		      for col as integer = 0 to sheet.lastColumn
+		        var rc as Module1.clCell = row.GetCell(col)
+		        var tmp as string 
+		        if rc <> nil then tmp = rc.CellValue
+		        
+		        Listbox1.CellTextAt(listbox1.LastAddedRowIndex, col+1) = tmp
+		        
+		      next
+		      
+		    end if
+		    
+		  next
 		End Sub
 	#tag EndEvent
 #tag EndEvents

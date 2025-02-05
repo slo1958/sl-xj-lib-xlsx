@@ -18,6 +18,20 @@ Protected Class clWorkbook
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Function GetSheet(name as string) As clWorksheet
+		  
+		  for each sheet as clWorksheet in self.sheets
+		    if sheet.Name = name then Return sheet
+		    
+		  next
+		  
+		  return nil
+		  
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Function GetSheetNames() As string()
 		  var ret() as string
 		  

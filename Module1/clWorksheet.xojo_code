@@ -34,6 +34,8 @@ Protected Class clWorksheet
 	#tag Method, Flags = &h0
 		Function GetCell(row as integer, column as integer) As clCell
 		  
+		  if row > rows.LastIndex then return nil
+		  
 		  return rows(row).GetCell(column)
 		  
 		  

@@ -25,6 +25,8 @@ Protected Class clWorkrow
 	#tag Method, Flags = &h0
 		Function GetCell(column as integer) As clCell
 		  
+		  if column > cells.LastIndex then return nil
+		  
 		  return cells(column)
 		  
 		End Function
