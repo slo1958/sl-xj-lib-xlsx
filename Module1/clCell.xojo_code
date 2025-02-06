@@ -29,6 +29,7 @@ Protected Class clCell
 		  self.CellRow = p.Left
 		  self.CellColumn = p.Right
 		  
+		  return
 		  
 		End Sub
 	#tag EndMethod
@@ -45,7 +46,7 @@ Protected Class clCell
 		    
 		    var a as integer = colBase.IndexOf(char)
 		    
-		    if "A" <= char and char <= "Z" then tmpcol = tmpcol * 26 + colBase.IndexOf(char)
+		    if "A" <= char and char <= "Z" then tmpcol = tmpcol * 26 + colBase.IndexOf(char)+1
 		    if "0" <= char and char <= "9" then tmprow = tmprow*10 + char.ToInteger
 		    
 		  next
@@ -53,6 +54,20 @@ Protected Class clCell
 		  return tmprow : tmpcol
 		  
 		  
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function GetValueAsString(wb as clWorkbook) As string
+		  
+		  if self.CellSharedStringIndex < 0 then
+		    return CellValue
+		    
+		  else
+		    return wb.GetSharedString(CellSharedStringIndex)
+		    
+		  end if
 		  
 		End Function
 	#tag EndMethod
@@ -110,8 +125,8 @@ Protected Class clCell
 		CellType As string
 	#tag EndProperty
 
-	#tag Property, Flags = &h0
-		CellValue As string
+	#tag Property, Flags = &h21
+		Private CellValue As string
 	#tag EndProperty
 
 
@@ -161,7 +176,55 @@ Protected Class clCell
 			Visible=false
 			Group="Behavior"
 			InitialValue=""
+			Type="string"
+			EditorType="MultiLineEditor"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="CellColumn"
+			Visible=false
+			Group="Behavior"
+			InitialValue=""
+			Type="string"
+			EditorType=""
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="CellFormula"
+			Visible=false
+			Group="Behavior"
+			InitialValue=""
+			Type="string"
+			EditorType=""
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="CellLocation"
+			Visible=false
+			Group="Behavior"
+			InitialValue=""
+			Type="string"
+			EditorType=""
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="CellRow"
+			Visible=false
+			Group="Behavior"
+			InitialValue=""
 			Type="Integer"
+			EditorType=""
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="CellSharedStringIndex"
+			Visible=false
+			Group="Behavior"
+			InitialValue=""
+			Type="integer"
+			EditorType=""
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="CellType"
+			Visible=false
+			Group="Behavior"
+			InitialValue=""
+			Type="string"
 			EditorType=""
 		#tag EndViewProperty
 	#tag EndViewBehavior

@@ -69,6 +69,7 @@ Begin DesktopWindow Window1
       Underline       =   False
       Visible         =   True
       Width           =   545
+      _ScrollOffset   =   0
       _ScrollWidth    =   -1
    End
    Begin DesktopPopupMenu PopupMenu1
@@ -153,12 +154,12 @@ End
 		    Listbox1.AddRow ""
 		    
 		    if row <> nil then
-		      for col as integer = 0 to sheet.lastColumn
+		      for col as integer = 1 to sheet.lastColumn
 		        var rc as Module1.clCell = row.GetCell(col)
 		        var tmp as string 
-		        if rc <> nil then tmp = rc.CellValue
+		        if rc <> nil then tmp = rc.GetValueAsString(app.loadedWorkbook)
 		        
-		        Listbox1.CellTextAt(listbox1.LastAddedRowIndex, col+1) = tmp
+		        Listbox1.CellTextAt(listbox1.LastAddedRowIndex, col-1) = tmp
 		        
 		      next
 		      

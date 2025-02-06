@@ -13,6 +13,8 @@ Protected Class clWorksheet
 		  if self.lastColumn < column then self.lastColumn = column
 		  
 		  rows(row).AddCell(column, cell)
+		  
+		  return
 		End Sub
 	#tag EndMethod
 
@@ -42,14 +44,14 @@ Protected Class clWorksheet
 		End Function
 	#tag EndMethod
 
-	#tag Method, Flags = &h0
-		Sub LoadSheetData(basenode as XMLNode)
+	#tag Method, Flags = &h1
+		Protected Sub LoadSheetData(basenode as XMLNode)
 		  
 		  var x1 as xmlnode = basenode.FirstChild
 		  var lvl as integer = 0
 		  
 		  while x1 <> nil 
-		    System.DebugLog(str(lvl)+":"+x1.name)
+		    clWorkbook.WriteLog(CurrentMethodName ,lvl, x1.name)
 		    
 		    if x1.name = "row" then self.LoadSheetDataRow(x1)
 		    
@@ -62,8 +64,8 @@ Protected Class clWorksheet
 		End Sub
 	#tag EndMethod
 
-	#tag Method, Flags = &h0
-		Sub LoadSheetDataCell(basenode as XMLNode)
+	#tag Method, Flags = &h1
+		Protected Sub LoadSheetDataCell(basenode as XMLNode)
 		  
 		  var cellrange as string = basenode.GetAttribute("r")
 		  var cellstyle as string = basenode.GetAttribute("s")
@@ -79,7 +81,7 @@ Protected Class clWorksheet
 		  var lvl as integer = 0
 		  
 		  while x1 <> nil 
-		    System.DebugLog(str(lvl)+":"+x1.name)
+		    clWorkbook.WriteLog(CurrentMethodName ,lvl, x1.name)
 		    
 		    if x1.name = "v" and x1.FirstChild <> nil then mycell.SetValue(x1.FirstChild.Value)
 		    if x1.name = "f"  and x1.FirstChild <> nil then mycell.SetFormula(x1.FirstChild.Value)
@@ -92,8 +94,8 @@ Protected Class clWorksheet
 		End Sub
 	#tag EndMethod
 
-	#tag Method, Flags = &h0
-		Sub LoadSheetDataRow(basenode as XMLNode)
+	#tag Method, Flags = &h1
+		Protected Sub LoadSheetDataRow(basenode as XMLNode)
 		  
 		  var rowId as string = basenode.GetAttribute("r")
 		  var rowspan as string = basenode.GetAttribute("span")
@@ -102,7 +104,7 @@ Protected Class clWorksheet
 		  var lvl as integer = 0
 		  
 		  while x1 <> nil 
-		    System.DebugLog(str(lvl)+":"+x1.name)
+		    clWorkbook.WriteLog(CurrentMethodName ,lvl, x1.name)
 		    
 		    if x1.name = "c" then self.LoadSheetDataCell(x1)
 		    
@@ -133,7 +135,7 @@ Protected Class clWorksheet
 		  var lvl as integer = 0
 		  
 		  while x1 <> nil 
-		    System.DebugLog(str(lvl)+":"+x1.name)
+		    clWorkbook.WriteLog(CurrentMethodName ,lvl, x1.name)
 		    
 		    if x1.name = "dimension" then System.DebugLog("REF:"+x1.GetAttribute("ref"))
 		    if x1.name = "sheetData" then LoadSheetData(x1)
@@ -228,6 +230,14 @@ Protected Class clWorksheet
 		#tag EndViewProperty
 		#tag ViewProperty
 			Name="Id"
+			Visible=false
+			Group="Behavior"
+			InitialValue=""
+			Type="Integer"
+			EditorType=""
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="lastColumn"
 			Visible=false
 			Group="Behavior"
 			InitialValue=""

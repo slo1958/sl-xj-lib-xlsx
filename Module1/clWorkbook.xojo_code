@@ -1,7 +1,7 @@
 #tag Class
 Protected Class clWorkbook
 	#tag Method, Flags = &h0
-		Sub Constructor(file as FolderItem, workfolder as FolderItem = nil)
+		Sub Constructor(file as FolderItem, workfolder as FolderItem = nil, language as string = "")
 		  
 		  self.SourceFile = file
 		  self.TempFolder = workfolder
@@ -11,10 +11,21 @@ Protected Class clWorkbook
 		    
 		  end if
 		  
+		  self.InitInternals(language)
 		  
+		  self.LoadSharedStrings()
+		  self.LoadStyles()
 		  self.LoadWorkbookInfo()
 		  
 		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function GetSharedString(stringIndex as integer) As String
+		  
+		  return self.SharedStrings.Lookup(stringIndex, "")
+		  
+		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
@@ -46,68 +57,136 @@ Protected Class clWorkbook
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub LoadWorkbookInfo()
+		Sub InitInternals(language as string)
+		  //
+		  //
+		  // check language
+		  //
+		  // use as template to create language specific elements
+		  //
+		  
+		  select case language
+		    
+		  case "zh-tw"
+		    
+		  case "zh-cn"
+		    
+		  case "ja-jp"
+		    
+		  case "ko-kr"
+		    
+		  case "th-th"
+		    
+		  case else
+		    
+		  end select
+		  
+		  
+		  
+		  // Create default numbering format
+		  // https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.numberingformat?view=openxml-3.0.1
+		  //
+		  // numFmt (Number Format)
+		  // This element specifies number format properties which indicate how to format and render the numeric value of a cell.
+		  // Following is a listing of number formats whose formatCode value is implied rather than explicitly saved in the file. In this case a numFmtId value is written on the xf record, but no corresponding numFmt element is written. Some of these Ids can be interpreted differently, depending on the UI language of the implementing application.
+		  // Ids not specified in the listing, such as 5, 6, 7, and 8, shall follow the number format specified by the formatCode attribute.
+		  //
+		  // The primary goal when a cell is using "General" formatting is to render the cell content without user-specified guidance
+		  //  to the best ability of the application.
+		  //
+		  // Language specific formats are not created
+		  //
+		  NumberingFormat = new Dictionary
+		  
+		  //
+		  // All languages
+		  //
+		  numberingformat.value(0) = "General"
+		  numberingformat.value(1) = "0"
+		  numberingformat.value(2) = "0.00"
+		  numberingformat.value(3) = "#,##0"
+		  numberingformat.value(4) = "#,##0.00"
+		  numberingformat.value(9) = "0%"
+		  numberingformat.value(10) = "0.00%"
+		  numberingformat.value(11) = "0.00E+00"
+		  numberingformat.value(12) = "# ?/?"
+		  numberingformat.value(13) = "# ??/??"
+		  numberingformat.value(14) = "mm-dd-yy"
+		  numberingformat.value(15) = "d-mmm-yy"
+		  numberingformat.value(16) = "d-mmm"
+		  numberingformat.value(17) = "mmm-yy"
+		  numberingformat.value(18) = "h:mm AM/PM"
+		  numberingformat.value(19) = "h:mm:ss AM/PM"
+		  numberingformat.value(20) = "h:mm"
+		  numberingformat.value(21) = "h:mm:ss"
+		  numberingformat.value(22) = "m/d/yy h:mm"
+		  numberingformat.value(37) = "#,##0 ;(#,##0)"
+		  numberingformat.value(38) = "#,##0 ;[Red](#,##0)"
+		  numberingformat.value(39) = "#,##0.00;(#,##0.00)"
+		  numberingformat.value(40) = "#,##0.00;[Red](#,##0.00)"
+		  numberingformat.value(45) = "mm:ss"
+		  numberingformat.value(46) = "[h]:mm:ss"
+		  numberingformat.value(47) = "mmss.0"
+		  numberingformat.value(48) = "##0.0E+0"
+		  numberingformat.value(49) = "@"
+		  
+		  
+		  
+		  
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
+		Protected Sub LoadCellXfs(basenode as XMLNode)
+		  
+		  CellXf  = new Dictionary
+		  
+		  var x1 as xmlnode = basenode.FirstChild
+		  var lvl as integer = 0
+		  var xfcount as integer
+		  
+		  while x1 <> nil
+		    if x1.name = "xf" then
+		      CellXf.Value(xfcount) = new clCellXf( false, x1)
+		      
+		      xfcount = xfcount + 1
+		      
+		    end if
+		    
+		    
+		    x1 = x1.NextSibling
+		    
+		  wend
+		  
+		  Return
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub LoadSharedStrings()
+		  
+		  self.SharedStrings = new Dictionary
 		  
 		  var tmp as FolderItem = self.TempFolder
 		  
 		  if tmp = nil then return
 		  
 		  
-		  var workbookxml as XMLDocument = new XMLDocument(tmp.Child("xl").child("workbook.xml"))
-		  
-		  var x1 as xmlnode = workbookxml.FirstChild
-		  var lvl1 as integer = 0
-		  
-		  while x1 <> nil 
-		    System.DebugLog(str(lvl1)+":"+x1.name)
-		    
-		    if x1.name = "sheet" then
-		      var name as string = x1.GetAttribute("name")
-		      var sheetid as string = x1.GetAttribute("sheetId")
-		      var rid as String = x1.GetAttribute("r:id")
-		      sheets.Add(new clWorksheet( self.TempFolder, name, sheetid.ToInteger))
-		      
-		       
-		      
-		    end if
-		    
-		    // Navigate the tree
-		    if x1.name ="workbook" then 
-		      x1 = x1.FirstChild
-		      lvl1 = lvl1+1
-		      
-		    elseif x1.name = "sheets" then
-		      x1 = x1.FirstChild
-		      lvl1 = lvl1 + 1
-		      
-		    else
-		      x1 = x1.NextSibling
-		      
-		    end if
-		    
-		  wend
-		  
-		  
 		  var sharedstringxml as XMLDocument = new XMLDocument(tmp.Child("xl").child("sharedStrings.xml"))
+		  
 		  
 		  var x2 as xmlnode = sharedstringxml.FirstChild
 		  var lvl2 as integer = 0
 		  var strCounter as integer
 		  
 		  while x2 <> nil 
-		    System.DebugLog(str(lvl2)+":"+x2.name)
+		    clWorkbook.WriteLog(CurrentMethodName ,lvl2, x2.name)
 		    
 		    if x2.name = "si" then 
 		      
 		      var x3 as XMLNode = x2.FirstChild
-		       
 		      
-		      while sharedstrings.LastIndex < strCounter 
-		        SharedStrings.Add("??")
-		        
-		      wend
-		      
-		      SharedStrings(strCounter) = x3.FirstChild.Value
+		      SharedStrings.value(strCounter) = x3.FirstChild.Value
 		      strCounter = strCounter + 1
 		      
 		    end if
@@ -127,6 +206,121 @@ Protected Class clWorkbook
 		  
 		  return
 		  
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub LoadStyles()
+		  
+		  var tmp as FolderItem = self.TempFolder
+		  
+		  if tmp = nil then return
+		  
+		  var StyleXml as XMLDocument = new XMLDocument(tmp.Child("xl").child("styles.xml"))
+		  
+		  var x1 as xmlnode = StyleXml.FirstChild
+		  var lvl1 as integer = 0
+		  
+		  
+		  while x1 <> nil 
+		    clWorkbook.Writelog(CurrentMethodName, lvl1, x1.name)
+		    
+		    if x1.name = "fonts" then
+		      
+		    elseif x1.name = "fills" then
+		      
+		    elseif x1.name = "borders" then
+		      
+		    elseif x1.name = "cellStyleXfs" then
+		      self.LoadStyleXfs(x1)
+		      
+		    elseif x1.name = "cellXfs" then
+		      self.LoadCellXfs(x1)
+		      
+		    elseif x1.name = "cellStyles" then
+		      
+		    elseif x1.name = "styleSheet" then
+		      x1 = x1.FirstChild
+		      
+		    end if
+		    
+		    x1 = x1.NextSibling
+		    
+		  wend
+		  
+		  return
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
+		Protected Sub LoadStyleXfs(basenode as XMLNode)
+		  
+		  StyleXfs  = new Dictionary
+		  
+		  var x1 as xmlnode = basenode.FirstChild
+		  var lvl as integer = 0
+		  var xfcount as integer
+		  
+		  while x1 <> nil
+		    if x1.name = "xf" then
+		      StyleXfs.Value(xfcount) = new clCellXf( true, x1)
+		      
+		      xfcount = xfcount + 1
+		      
+		    end if
+		    
+		    
+		    x1 = x1.NextSibling
+		    
+		  wend
+		  
+		  Return
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub LoadWorkbookInfo()
+		  
+		  var tmp as FolderItem = self.TempFolder
+		  
+		  if tmp = nil then return
+		  
+		  
+		  var workbookxml as XMLDocument = new XMLDocument(tmp.Child("xl").child("workbook.xml"))
+		  
+		  var x1 as xmlnode = workbookxml.FirstChild
+		  var lvl1 as integer = 0
+		  
+		  while x1 <> nil 
+		    clWorkbook.WriteLog(CurrentMethodName ,lvl1, x1.name)
+		    
+		    if x1.name = "sheet" then
+		      var name as string = x1.GetAttribute("name")
+		      var sheetid as string = x1.GetAttribute("sheetId")
+		      var rid as String = x1.GetAttribute("r:id")
+		      sheets.Add(new clWorksheet( self.TempFolder, name, sheetid.ToInteger))
+		      
+		      
+		      
+		    end if
+		    
+		    // Navigate the tree
+		    if x1.name ="workbook" then 
+		      x1 = x1.FirstChild
+		      lvl1 = lvl1+1
+		      
+		    elseif x1.name = "sheets" then
+		      x1 = x1.FirstChild
+		      lvl1 = lvl1 + 1
+		      
+		    else
+		      x1 = x1.NextSibling
+		      
+		    end if
+		    
+		  wend
+		  
+		  return
 		End Sub
 	#tag EndMethod
 
@@ -160,6 +354,17 @@ Protected Class clWorkbook
 		End Function
 	#tag EndMethod
 
+	#tag Method, Flags = &h0
+		Shared Sub Writelog(Source as string, level as integer, message as string)
+		  
+		  System.DebugLog(source+", " + "level " + str(level)+ ": " + message)
+		End Sub
+	#tag EndMethod
+
+
+	#tag Property, Flags = &h0
+		CellXf As Dictionary
+	#tag EndProperty
 
 	#tag Property, Flags = &h0
 		ExpectedStringCount As Integer
@@ -170,7 +375,11 @@ Protected Class clWorkbook
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
-		SharedStrings() As String
+		NumberingFormat As Dictionary
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
+		SharedStrings As Dictionary
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
@@ -179,6 +388,10 @@ Protected Class clWorkbook
 
 	#tag Property, Flags = &h0
 		SourceFile As FolderItem
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
+		StyleXfs As Dictionary
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
@@ -224,6 +437,22 @@ Protected Class clWorkbook
 			Visible=true
 			Group="Position"
 			InitialValue="0"
+			Type="Integer"
+			EditorType=""
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="ExpectedStringCount"
+			Visible=false
+			Group="Behavior"
+			InitialValue=""
+			Type="Integer"
+			EditorType=""
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="ExpectedStringUniqueCount"
+			Visible=false
+			Group="Behavior"
+			InitialValue=""
 			Type="Integer"
 			EditorType=""
 		#tag EndViewProperty

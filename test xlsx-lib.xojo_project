@@ -11,6 +11,7 @@ Class=clWorkbook;Module1/clWorkbook.xojo_code;&h00000000563A6FFF;&h00000000266CF
 Class=clWorksheet;Module1/clWorksheet.xojo_code;&h00000000537BCFFF;&h00000000266CF7FF;false
 Class=clCell;Module1/clCell.xojo_code;&h000000007EC05FFF;&h00000000266CF7FF;false
 Class=clWorkrow;Module1/clWorkrow.xojo_code;&h000000001FA67FFF;&h00000000266CF7FF;false
+Class=clCellXf;Module1/clCellXf.xojo_code;&h000000006629FFFF;&h00000000266CF7FF;false
 DefaultWindow=Window1
 AppMenuBar=MainMenuBar
 MajorVersion=1

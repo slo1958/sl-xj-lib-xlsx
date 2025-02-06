@@ -17,7 +17,7 @@ Inherits DesktopApplication
 		  
 		  self.loadedWorkbook = new Module1.clWorkbook(fld)
 		  
-		  
+		  return
 		End Sub
 	#tag EndEvent
 
