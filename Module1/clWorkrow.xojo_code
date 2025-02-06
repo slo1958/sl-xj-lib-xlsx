@@ -3,12 +3,14 @@ Protected Class clWorkrow
 	#tag Method, Flags = &h0
 		Sub AddCell(column as integer, cell as clCell)
 		  
-		  while cells.LastIndex <= column
+		  var tmpcolumn as integer = column - 1
+		  
+		  while cells.LastIndex <= tmpcolumn
 		    Cells.add nil
 		    
 		  wend
 		  
-		  cells(column) = cell
+		  cells(tmpcolumn) = cell
 		  
 		  
 		End Sub
@@ -27,7 +29,7 @@ Protected Class clWorkrow
 		  
 		  if column > cells.LastIndex then return nil
 		  
-		  return cells(column)
+		  return cells(column-1)
 		  
 		End Function
 	#tag EndMethod
@@ -84,7 +86,7 @@ Protected Class clWorkrow
 			EditorType=""
 		#tag EndViewProperty
 		#tag ViewProperty
-			Name="cells()"
+			Name="row"
 			Visible=false
 			Group="Behavior"
 			InitialValue=""

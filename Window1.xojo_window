@@ -139,7 +139,7 @@ End
 	#tag EndEvent
 	#tag Event
 		Sub SelectionChanged(item As DesktopMenuItem)
-		  
+		  Const colBase as string = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 		  var name as string = me.SelectedRowText
 		  
 		  var sheet as Module1.clWorksheet = app.loadedWorkbook.GetSheet(name)
@@ -150,16 +150,25 @@ End
 		  
 		  listbox1.ColumnCount = sheet.lastColumn + 2
 		  
+		  listbox1.HeaderAt(0) = "#"
+		  
+		  for i as integer= 1 to sheet.lastColumn + 2
+		    listbox1.HeaderAt(i) = colBase.Middle(i,1)
+		    
+		  next
+		  
+		  
 		  for each row as Module1.clWorkrow in sheet.rows
-		    Listbox1.AddRow ""
 		    
 		    if row <> nil then
+		      Listbox1.AddRow str(row.row)
+		      
 		      for col as integer = 1 to sheet.lastColumn
 		        var rc as Module1.clCell = row.GetCell(col)
 		        var tmp as string 
 		        if rc <> nil then tmp = rc.GetValueAsString(app.loadedWorkbook)
 		        
-		        Listbox1.CellTextAt(listbox1.LastAddedRowIndex, col-1) = tmp
+		        Listbox1.CellTextAt(listbox1.LastAddedRowIndex, col) = tmp
 		        
 		      next
 		      

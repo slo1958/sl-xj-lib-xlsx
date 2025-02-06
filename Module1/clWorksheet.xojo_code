@@ -3,16 +3,18 @@ Protected Class clWorksheet
 	#tag Method, Flags = &h0
 		Sub AddCell(row as integer, column as integer, cell as clCell)
 		  
-		  while rows.LastIndex <= row
+		  var tmprow as integer = row - 1
+		  
+		  while rows.LastIndex <= tmprow
 		    rows.add(nil)
 		    
 		  wend
 		  
-		  if rows(row) = nil then rows(row) = new clWorkrow(row)
+		  if rows(tmprow) = nil then rows(tmprow) = new clWorkrow(row)
 		  
 		  if self.lastColumn < column then self.lastColumn = column
 		  
-		  rows(row).AddCell(column, cell)
+		  rows(tmprow).AddCell(column, cell)
 		  
 		  return
 		End Sub
@@ -38,7 +40,7 @@ Protected Class clWorksheet
 		  
 		  if row > rows.LastIndex then return nil
 		  
-		  return rows(row).GetCell(column)
+		  return rows(row-1).GetCell(column)
 		  
 		  
 		End Function
@@ -66,14 +68,14 @@ Protected Class clWorksheet
 
 	#tag Method, Flags = &h1
 		Protected Sub LoadSheetDataCell(basenode as XMLNode)
+		   
+		  const cFormula as string = "f"
+		  const cCellValue as string = "v"
+		  const cRichText as string = "is"
 		  
-		  var cellrange as string = basenode.GetAttribute("r")
-		  var cellstyle as string = basenode.GetAttribute("s")
-		  var celltype as String = basenode.GetAttribute("t") // if 't' == 's' => shares string, the value is the index
+		  var mycell as new clCell(basenode)
 		  
-		  var mycell as new clCell(cellrange, celltype, cellstyle)
-		  
-		  var p as pair = clCell.ExtractLocation(cellrange)
+		  var p as pair = clCell.ExtractLocation(mycell.CellLocation)
 		  
 		  self.AddCell(p.left, p.Right, mycell)
 		  
@@ -83,8 +85,10 @@ Protected Class clWorksheet
 		  while x1 <> nil 
 		    clWorkbook.WriteLog(CurrentMethodName ,lvl, x1.name)
 		    
-		    if x1.name = "v" and x1.FirstChild <> nil then mycell.SetValue(x1.FirstChild.Value)
-		    if x1.name = "f"  and x1.FirstChild <> nil then mycell.SetFormula(x1.FirstChild.Value)
+		    if x1.name = cRichText and x1.FirstChild <> nil then mycell.SetValueFromString(x1.FirstChild.Value)
+		    if x1.name = cCellValue and x1.FirstChild <> nil then mycell.SetValueFromString(x1.FirstChild.Value)
+		    if x1.name = cFormula and x1.FirstChild <> nil then mycell.SetFormula(x1.FirstChild.Value)
+		    
 		    if True then
 		      x1 = x1.NextSibling
 		      

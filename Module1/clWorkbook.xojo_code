@@ -21,6 +21,21 @@ Protected Class clWorkbook
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Function GetCellStyle(styleIndex as integer) As clCellXf
+		  
+		  return self.CellXf.Lookup(styleIndex, nil)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function GetFormat(formatIndex as integer) As string
+		  
+		  return self.NumberingFormat.lookup(formatIndex, "")
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Function GetSharedString(stringIndex as integer) As String
 		  
 		  return self.SharedStrings.Lookup(stringIndex, "")
@@ -163,6 +178,12 @@ Protected Class clWorkbook
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Sub LoadNumFmts()
+		  
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Sub LoadSharedStrings()
 		  
 		  self.SharedStrings = new Dictionary
@@ -259,7 +280,7 @@ Protected Class clWorkbook
 		  
 		  var x1 as xmlnode = basenode.FirstChild
 		  var lvl as integer = 0
-		  var xfcount as integer
+		  var xfcount as integer = 1
 		  
 		  while x1 <> nil
 		    if x1.name = "xf" then

@@ -17,19 +17,55 @@ Protected Class clCell
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub Constructor(range as string, prmCelltype as string, cellFormat as string)
+		Sub Constructor(baseNode as XMLNode)
 		  
-		  self.CellLocation = range
+		  // Handle cell attributes
+		  //
+		  //
+		  // https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.spreadsheet.cell?view=openxml-3.0.1
+		  //
+		  // An A1 style reference to the location of this cell
+		  self.CellLocation =  basenode.GetAttribute("r")
+		  
+		  
+		  // The index of this cell's style. Style records are stored in the Styles Part.
+		  // The possible values for this attribute are defined by the W3C XML Schema unsignedInt datatype.
+		  self.CellStyle = basenode.GetAttribute("s").ToInteger
+		  
+		  
+		  // An enumeration representing the cell's data type.
+		  // The possible values for this attribute are defined by the ST_CellType simple type
+		  self.CellType =  basenode.GetAttribute("t")
+		  
+		  
+		  // Cell meta data
+		  // The zero-based index of the cell metadata record associated with this cell. 
+		  // Metadata information is found in the Metadata Part. 
+		  // Cell metadata is extra information stored at the cell level, and is attached to the cell (travels through moves, copy / paste, clear, etc). 
+		  // Cell metadata is not accessible via formula reference.
+		  //
+		  //The possible values for this attribute are defined by the W3C XML Schema unsignedInt datatype.
+		  // self.xxx = basenode.GetAttribute("cm")
+		  
+		  
+		  // Value meta data
+		  // The zero-based index of the value metadata record associated with this cell's value. 
+		  // Metadata records are stored in the Metadata Part. Value metadata is extra information stored at the cell level, but associated with the value rather than the cell itself. 
+		  // Value metadata is accessible via formula reference.
+		  //
+		  // The possible values for this attribute are defined by the W3C XML Schema unsignedInt datatype.
+		  // self.xxx = basenode.GetAttribute("vm")
+		  
+		  
+		  // Internals
 		  self.CellSharedStringIndex = -1
 		  
-		  self.CellType = prmCelltype
-		  
-		  var p as pair = self.ExtractLocation(range)
-		  
+		  var p as pair = self.ExtractLocation(self.CellLocation)
 		  self.CellRow = p.Left
 		  self.CellColumn = p.Right
 		  
 		  return
+		   
 		  
 		End Sub
 	#tag EndMethod
@@ -59,15 +95,65 @@ Protected Class clCell
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function GetValueAsString(wb as clWorkbook) As string
+		Function GetValueAsString(wb as clWorkbook) As String
 		  
-		  if self.CellSharedStringIndex < 0 then
-		    return CellValue
+		  const CDefaultNumberFormat = "-#####0.00##"
+		  
+		  //
+		  // String or shared string ?
+		  //
+		  select case self.CellType
 		    
-		  else
+		  case  TypeSharedString  
 		    return wb.GetSharedString(CellSharedStringIndex)
 		    
+		  case TypeFormulaString, TypeInlineString
+		    return self.CellStringValue
+		    
+		  end select
+		  
+		  
+		  //
+		  // Could be date or number
+		  //
+		  if self.CellStyle > 0 then
+		    var style as clCellXf = wb.GetCellStyle(self.CellStyle)
+		    
+		    if self.CellStyle = 2 then
+		      var d  as integer = 1
+		      var format as string = wb.GetFormat(style.NumberFormatId)
+		      d=2
+		    end if
+		    
+		    select case style.NumberFormatId
+		    case 14, 15, 16, 17 , 58 // TODO REMOVE 58
+		      var dateOffset as integer = self.CellValue
+		      var d as new DateTime(new Date(1900,1,1))
+		      
+		      d = d.AddInterval(0,0, dateOffset-2)
+		      
+		      return d.SQLDate
+		      
+		    case else
+		      var format as string = wb.GetFormat(style.NumberFormatId)
+		      
+		      if format = "General" then
+		        return format(self.CellValue, CDefaultNumberFormat)
+		        
+		      else
+		        return format(self.CellValue, format)
+		        
+		      end if
+		      
+		    end select
+		    
 		  end if
+		  
+		  
+		  return format(self.CellValue, CDefaultNumberFormat)
+		  
+		  
+		  
 		  
 		End Function
 	#tag EndMethod
@@ -82,16 +168,25 @@ Protected Class clCell
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub SetValue(prmValue as String)
+		Sub SetValueFromString(prmValue as String)
 		  
+		  self.CellStringValue = prmValue
 		  
-		  if self.celltype = "s" then 
+		  select case self.CellType
+		    
+		  case  TypeSharedString  
 		    self.CellSharedStringIndex = val(prmValue)
 		    
-		  else
+		  case TypeFormulaString, TypeInlineString
 		    self.CellValue = prmValue
 		    
-		  end if
+		  case TypeNumber
+		    self.CellValue = self.ValueParser(prmValue)
+		    
+		  else
+		    self.CellValue = self.ValueParser(prmValue)
+		    
+		  end select
 		  
 		  
 		  return
@@ -99,6 +194,43 @@ Protected Class clCell
 		  
 		End Sub
 	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Shared Function ValueParser(s as String) As double
+		  
+		  if s.IndexOf("E") < 0 then return val(s)
+		  
+		  var tmps as string = s.left(s.IndexOf("E"))
+		  var tmpx as string = s.right(s.Length - tmps.Length-1)
+		  var tmpi as integer = val(tmpx)
+		  
+		  var tmpd as Double = val(tmps)
+		  
+		  if tmpi = 0 then return tmpd
+		  
+		  var tmpm as double = if(tmpi>0, 10.0, 0.1)
+		  
+		  tmpi = abs (tmpi)
+		  
+		  while tmpi > 0
+		    tmpd = tmpd * tmpm
+		    tmpi = tmpi - 1
+		    
+		  wend
+		  
+		  return tmpd
+		  
+		End Function
+	#tag EndMethod
+
+
+	#tag Note, Name = About cell type
+		
+		Source
+		
+		https://schemas.liquid-technologies.com/officeopenxml/2006/?page=st_celltype.html
+		
+	#tag EndNote
 
 
 	#tag Property, Flags = &h0
@@ -122,12 +254,39 @@ Protected Class clCell
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
+		CellStringValue As string
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
+		CellStyle As Integer
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
 		CellType As string
 	#tag EndProperty
 
 	#tag Property, Flags = &h21
-		Private CellValue As string
+		Private CellValue As variant
 	#tag EndProperty
+
+
+	#tag Constant, Name = TypeBoolean, Type = String, Dynamic = False, Default = \"b", Scope = Public
+	#tag EndConstant
+
+	#tag Constant, Name = TypeError, Type = String, Dynamic = False, Default = \"e", Scope = Public
+	#tag EndConstant
+
+	#tag Constant, Name = TypeFormulaString, Type = String, Dynamic = False, Default = \"str", Scope = Public
+	#tag EndConstant
+
+	#tag Constant, Name = TypeInlineString, Type = String, Dynamic = False, Default = \"inlineStr", Scope = Public
+	#tag EndConstant
+
+	#tag Constant, Name = TypeNumber, Type = String, Dynamic = False, Default = \"n", Scope = Public
+	#tag EndConstant
+
+	#tag Constant, Name = TypeSharedString, Type = String, Dynamic = False, Default = \"s", Scope = Public
+	#tag EndConstant
 
 
 	#tag ViewBehavior
