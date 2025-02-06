@@ -30,7 +30,13 @@ Protected Class clWorkbook
 	#tag Method, Flags = &h0
 		Function GetFormat(formatIndex as integer) As string
 		  
-		  return self.NumberingFormat.lookup(formatIndex, "")
+		  if self.NumberingFormat.HasKey(formatIndex) then
+		    return self.NumberingFormat.lookup(formatIndex, "")
+		    
+		  else
+		    Return self.CustomNumberingFormat.lookup(formatIndex, "")
+		    
+		  end if
 		  
 		End Function
 	#tag EndMethod
@@ -121,6 +127,7 @@ Protected Class clWorkbook
 		  numberingformat.value(2) = "0.00"
 		  numberingformat.value(3) = "#,##0"
 		  numberingformat.value(4) = "#,##0.00"
+		  
 		  numberingformat.value(9) = "0%"
 		  numberingformat.value(10) = "0.00%"
 		  numberingformat.value(11) = "0.00E+00"
@@ -135,10 +142,13 @@ Protected Class clWorkbook
 		  numberingformat.value(20) = "h:mm"
 		  numberingformat.value(21) = "h:mm:ss"
 		  numberingformat.value(22) = "m/d/yy h:mm"
+		  
+		  
 		  numberingformat.value(37) = "#,##0 ;(#,##0)"
 		  numberingformat.value(38) = "#,##0 ;[Red](#,##0)"
 		  numberingformat.value(39) = "#,##0.00;(#,##0.00)"
 		  numberingformat.value(40) = "#,##0.00;[Red](#,##0.00)"
+		  
 		  numberingformat.value(45) = "mm:ss"
 		  numberingformat.value(46) = "[h]:mm:ss"
 		  numberingformat.value(47) = "mmss.0"
@@ -146,7 +156,31 @@ Protected Class clWorkbook
 		  numberingformat.value(49) = "@"
 		  
 		  
+		  //
+		  // Aditional formats
+		  //
+		  numberingformat.value(5 ) = "$#,##0\-$#,##0"
+		  numberingformat.value(6 ) = "$#,##0[Red]\-$#,##0"
+		  numberingformat.value(7 ) = "$#,##0.00\-$#,##0.00"
+		  numberingformat.value(8 ) = "$#,##0.00[Red]\-$#,##0.00"
 		  
+		  numberingformat.value(27 ) = "[$-404]e/m/d"
+		  numberingformat.value(30 ) = "m/d/yy"
+		  numberingformat.value(36 ) = "[$-404]e/m/d"
+		  numberingformat.value(50 ) = "[$-404]e/m/d"
+		  numberingformat.value(57 ) = "[$-404]e/m/d"
+		  
+		  numberingformat.value(59 ) = "t0"
+		  numberingformat.value(60 ) = "t0.00"
+		  numberingformat.value(61 ) = "t#,##0"
+		  numberingformat.value(62 ) = "t#,##0.00"
+		  numberingformat.value(67 ) = "t0%"
+		  numberingformat.value(68 ) = "t0.00%"
+		  numberingformat.value(69 ) = "t# ?/?"
+		  numberingformat.value(70 ) = "t# ??/??"
+		  
+		  Return
+		   
 		  
 		End Sub
 	#tag EndMethod
@@ -158,7 +192,9 @@ Protected Class clWorkbook
 		  
 		  var x1 as xmlnode = basenode.FirstChild
 		  var lvl as integer = 0
-		  var xfcount as integer
+		  
+		  // Zero based array
+		  var xfcount as integer = 0
 		  
 		  while x1 <> nil
 		    if x1.name = "xf" then
@@ -178,7 +214,28 @@ Protected Class clWorkbook
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub LoadNumFmts()
+		Sub LoadNumFmts(baseNode as XMLNode)
+		  
+		  self.CustomNumberingFormat = new Dictionary
+		  
+		  var x1 as xmlnode = basenode.FirstChild
+		  
+		  while x1 <> nil 
+		    clWorkbook.WriteLog(CurrentMethodName,-1, x1.name)
+		    
+		    if x1.name = "numFmt" then
+		      var formatcCode as string = x1.GetAttribute("formatCode")
+		      var id as integer = x1.GetAttribute("numFmtId").ToInteger
+		      
+		      self.CustomNumberingFormat.value(id) = formatcCode
+		      
+		      
+		    end if
+		    
+		    x1 = x1.NextSibling
+		    
+		  wend
+		  
 		  
 		End Sub
 	#tag EndMethod
@@ -246,6 +303,8 @@ Protected Class clWorkbook
 		  while x1 <> nil 
 		    clWorkbook.Writelog(CurrentMethodName, lvl1, x1.name)
 		    
+		    if x1.name = "styleSheet" then x1 = x1.FirstChild
+		    
 		    if x1.name = "fonts" then
 		      
 		    elseif x1.name = "fills" then
@@ -260,8 +319,13 @@ Protected Class clWorkbook
 		      
 		    elseif x1.name = "cellStyles" then
 		      
-		    elseif x1.name = "styleSheet" then
-		      x1 = x1.FirstChild
+		      
+		      
+		    elseif x1.name = "numFmts" then  
+		      self.LoadNumFmts(x1)
+		      
+		    else
+		      System.DebugLog(">>>" + CurrentMethodName+":" + x1.name)
 		      
 		    end if
 		    
@@ -377,6 +441,16 @@ Protected Class clWorkbook
 
 	#tag Method, Flags = &h0
 		Shared Sub Writelog(Source as string, level as integer, message as string)
+		  var ignored() as string
+		  
+		  ignored.add("Module1.clWorksheet.")
+		  ignored.add("Module1.clWorkbook.LoadSharedString")
+		  ignored.add("Module1.clWorkbook.LoadWorkbookInfo")
+		  
+		  for each ignore as string in ignored
+		    if source.IndexOf(ignore) >=0 then return
+		    
+		  next
 		  
 		  System.DebugLog(source+", " + "level " + str(level)+ ": " + message)
 		End Sub
@@ -385,6 +459,10 @@ Protected Class clWorkbook
 
 	#tag Property, Flags = &h0
 		CellXf As Dictionary
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
+		CustomNumberingFormat As Dictionary
 	#tag EndProperty
 
 	#tag Property, Flags = &h0

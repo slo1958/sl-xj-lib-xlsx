@@ -65,7 +65,7 @@ Protected Class clCell
 		  self.CellColumn = p.Right
 		  
 		  return
-		   
+		  
 		  
 		End Sub
 	#tag EndMethod
@@ -119,6 +119,8 @@ Protected Class clCell
 		  if self.CellStyle > 0 then
 		    var style as clCellXf = wb.GetCellStyle(self.CellStyle)
 		    
+		    
+		    // retain for debugging
 		    if self.CellStyle = 2 then
 		      var d  as integer = 1
 		      var format as string = wb.GetFormat(style.NumberFormatId)
@@ -331,7 +333,7 @@ Protected Class clCell
 			EditorType=""
 		#tag EndViewProperty
 		#tag ViewProperty
-			Name="CellValue"
+			Name="CellColumn"
 			Visible=false
 			Group="Behavior"
 			InitialValue=""
@@ -339,20 +341,12 @@ Protected Class clCell
 			EditorType="MultiLineEditor"
 		#tag EndViewProperty
 		#tag ViewProperty
-			Name="CellColumn"
-			Visible=false
-			Group="Behavior"
-			InitialValue=""
-			Type="string"
-			EditorType=""
-		#tag EndViewProperty
-		#tag ViewProperty
 			Name="CellFormula"
 			Visible=false
 			Group="Behavior"
 			InitialValue=""
 			Type="string"
-			EditorType=""
+			EditorType="MultiLineEditor"
 		#tag EndViewProperty
 		#tag ViewProperty
 			Name="CellLocation"
@@ -360,7 +354,7 @@ Protected Class clCell
 			Group="Behavior"
 			InitialValue=""
 			Type="string"
-			EditorType=""
+			EditorType="MultiLineEditor"
 		#tag EndViewProperty
 		#tag ViewProperty
 			Name="CellRow"
@@ -384,6 +378,22 @@ Protected Class clCell
 			Group="Behavior"
 			InitialValue=""
 			Type="string"
+			EditorType="MultiLineEditor"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="CellStringValue"
+			Visible=false
+			Group="Behavior"
+			InitialValue=""
+			Type="string"
+			EditorType=""
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="CellStyle"
+			Visible=false
+			Group="Behavior"
+			InitialValue=""
+			Type="Integer"
 			EditorType=""
 		#tag EndViewProperty
 	#tag EndViewBehavior
