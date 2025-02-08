@@ -10,7 +10,7 @@ Begin DesktopWindow Window1
    HasFullScreenButton=   False
    HasMaximizeButton=   True
    HasMinimizeButton=   True
-   Height          =   400
+   Height          =   446
    ImplicitInstance=   True
    MacProcID       =   0
    MaximumHeight   =   32000
@@ -47,7 +47,7 @@ Begin DesktopWindow Window1
       HasHorizontalScrollbar=   False
       HasVerticalScrollbar=   True
       HeadingIndex    =   -1
-      Height          =   308
+      Height          =   316
       Index           =   -2147483648
       InitialValue    =   ""
       Italic          =   False
@@ -101,6 +101,38 @@ Begin DesktopWindow Window1
       Visible         =   True
       Width           =   183
    End
+   Begin DesktopLabel Label1
+      AllowAutoDeactivate=   True
+      Bold            =   False
+      Enabled         =   True
+      FontName        =   "System"
+      FontSize        =   0.0
+      FontUnit        =   0
+      Height          =   20
+      Index           =   -2147483648
+      Italic          =   False
+      Left            =   35
+      LockBottom      =   False
+      LockedInPosition=   False
+      LockLeft        =   True
+      LockRight       =   False
+      LockTop         =   True
+      Multiline       =   False
+      Scope           =   0
+      Selectable      =   False
+      TabIndex        =   2
+      TabPanelIndex   =   0
+      TabStop         =   True
+      Text            =   "Untitled"
+      TextAlignment   =   0
+      TextColor       =   &c000000
+      Tooltip         =   ""
+      Top             =   400
+      Transparent     =   False
+      Underline       =   False
+      Visible         =   True
+      Width           =   223
+   End
 End
 #tag EndDesktopWindow
 
@@ -121,6 +153,16 @@ End
 		Sub Opening()
 		  
 		End Sub
+	#tag EndEvent
+	#tag Event
+		Function CellPressed(row As Integer, column As Integer, x As Integer, y As Integer) As Boolean
+		  
+		  var tmp as string = me.CellTextAt(row, column)
+		  
+		  Label1.Text = tmp
+		  
+		  
+		End Function
 	#tag EndEvent
 #tag EndEvents
 #tag Events PopupMenu1
@@ -153,7 +195,7 @@ End
 		  listbox1.HeaderAt(0) = "#"
 		  
 		  for i as integer= 1 to sheet.lastColumn + 2
-		    listbox1.HeaderAt(i) = colBase.Middle(i,1)
+		    listbox1.HeaderAt(i) = colBase.Middle(i-1,1)
 		    
 		  next
 		  

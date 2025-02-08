@@ -100,6 +100,11 @@ Protected Class clCell
 		  const CDefaultNumberFormat = "-#####0.00##"
 		  
 		  //
+		  // Return empty string is the loaded cell value is empty
+		  //
+		  if self.CellSourceValue.trim.Length = 0 then return ""
+		  
+		  //
 		  // String or shared string ?
 		  //
 		  select case self.CellType
@@ -108,10 +113,9 @@ Protected Class clCell
 		    return wb.GetSharedString(CellSharedStringIndex)
 		    
 		  case TypeFormulaString, TypeInlineString
-		    return self.CellStringValue
+		    return self.CellSourceValue
 		    
 		  end select
-		  
 		  
 		  //
 		  // Could be date or number
@@ -121,34 +125,23 @@ Protected Class clCell
 		    
 		    
 		    // retain for debugging
-		    if self.CellStyle = 2 then
-		      var d  as integer = 1
-		      var format as string = wb.GetFormat(style.NumberFormatId)
+		    
+		    if self.CellLocation = "E3" then
+		      
+		      var d  as integer 
+		      d = 1
+		      var format as clCellFormatter = wb.GetFormat(style.NumberFormatId)
 		      d=2
 		    end if
+		     
 		    
-		    select case style.NumberFormatId
-		    case 14, 15, 16, 17 , 58 // TODO REMOVE 58
-		      var dateOffset as integer = self.CellValue
-		      var d as new DateTime(new Date(1900,1,1))
-		      
-		      d = d.AddInterval(0,0, dateOffset-2)
-		      
-		      return d.SQLDate
-		      
-		    case else
-		      var format as string = wb.GetFormat(style.NumberFormatId)
-		      
-		      if format = "General" then
-		        return format(self.CellValue, CDefaultNumberFormat)
-		        
-		      else
-		        return format(self.CellValue, format)
-		        
-		      end if
-		      
-		    end select
+		    var fmt as clCellFormatter = wb.GetFormat(style.NumberFormatId)
 		    
+		    if fmt <> nil then
+		      return fmt.FormatValue(self.CellValue)
+		      
+		      
+		    end if
 		  end if
 		  
 		  
@@ -172,7 +165,7 @@ Protected Class clCell
 	#tag Method, Flags = &h0
 		Sub SetValueFromString(prmValue as String)
 		  
-		  self.CellStringValue = prmValue
+		  self.CellSourceValue = prmValue
 		  
 		  select case self.CellType
 		    
@@ -256,7 +249,7 @@ Protected Class clCell
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
-		CellStringValue As string
+		CellSourceValue As string
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
@@ -381,12 +374,12 @@ Protected Class clCell
 			EditorType="MultiLineEditor"
 		#tag EndViewProperty
 		#tag ViewProperty
-			Name="CellStringValue"
+			Name="CellSourceValue"
 			Visible=false
 			Group="Behavior"
 			InitialValue=""
 			Type="string"
-			EditorType=""
+			EditorType="MultiLineEditor"
 		#tag EndViewProperty
 		#tag ViewProperty
 			Name="CellStyle"

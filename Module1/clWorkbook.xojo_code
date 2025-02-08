@@ -1,21 +1,19 @@
 #tag Class
 Protected Class clWorkbook
 	#tag Method, Flags = &h0
-		Sub Constructor(file as FolderItem, workfolder as FolderItem = nil, language as string = "")
+		Sub Constructor(file as FolderItem, workfolder as FolderItem = nil, DeferredLoad as boolean = False, language as string = "")
+		  
+		  self.InCellLineBreak = " "
 		  
 		  self.SourceFile = file
 		  self.TempFolder = workfolder
 		  
-		  if self.UnzipToTemporary <> 0 then
-		    return
-		    
-		  end if
-		  
 		  self.InitInternals(language)
 		  
-		  self.LoadSharedStrings()
-		  self.LoadStyles()
-		  self.LoadWorkbookInfo()
+		  if not DeferredLoad then
+		    self.load
+		    
+		  end if
 		  
 		End Sub
 	#tag EndMethod
@@ -28,7 +26,7 @@ Protected Class clWorkbook
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function GetFormat(formatIndex as integer) As string
+		Function GetFormat(formatIndex as integer) As clCellFormatter
 		  
 		  if self.NumberingFormat.HasKey(formatIndex) then
 		    return self.NumberingFormat.lookup(formatIndex, "")
@@ -77,8 +75,8 @@ Protected Class clWorkbook
 		End Function
 	#tag EndMethod
 
-	#tag Method, Flags = &h0
-		Sub InitInternals(language as string)
+	#tag Method, Flags = &h1
+		Protected Sub InitInternals(language as string)
 		  //
 		  //
 		  // check language
@@ -119,68 +117,96 @@ Protected Class clWorkbook
 		  //
 		  NumberingFormat = new Dictionary
 		  
+		  
+		  var formatList(99) as string
+		  
 		  //
 		  // All languages
 		  //
-		  numberingformat.value(0) = "General"
-		  numberingformat.value(1) = "0"
-		  numberingformat.value(2) = "0.00"
-		  numberingformat.value(3) = "#,##0"
-		  numberingformat.value(4) = "#,##0.00"
 		  
-		  numberingformat.value(9) = "0%"
-		  numberingformat.value(10) = "0.00%"
-		  numberingformat.value(11) = "0.00E+00"
-		  numberingformat.value(12) = "# ?/?"
-		  numberingformat.value(13) = "# ??/??"
-		  numberingformat.value(14) = "mm-dd-yy"
-		  numberingformat.value(15) = "d-mmm-yy"
-		  numberingformat.value(16) = "d-mmm"
-		  numberingformat.value(17) = "mmm-yy"
-		  numberingformat.value(18) = "h:mm AM/PM"
-		  numberingformat.value(19) = "h:mm:ss AM/PM"
-		  numberingformat.value(20) = "h:mm"
-		  numberingformat.value(21) = "h:mm:ss"
-		  numberingformat.value(22) = "m/d/yy h:mm"
+		  formatList(0) = "General"
+		  formatList(1) = "0"
+		  formatList(2) = "0.00"
+		  formatList(3) = "#,##0"
+		  formatList(4) = "#,##0.00"
+		  
+		  formatList(9) = "0%"
+		  formatList(10) = "0.00%"
+		  formatList(11) = "0.00E+00"
+		  formatList(12) = "# ?/?"
+		  formatList(13) = "# ??/??"
+		  formatList(14) = "mm-dd-yy"
+		  formatList(15) = "d-mmm-yy"
+		  formatList(16) = "d-mmm"
+		  formatList(17) = "mmm-yy"
+		  formatList(18) = "h:mm AM/PM"
+		  formatList(19) = "h:mm:ss AM/PM"
+		  formatList(20) = "h:mm"
+		  formatList(21) = "h:mm:ss"
+		  formatList(22) = "m/d/yy h:mm"
 		  
 		  
-		  numberingformat.value(37) = "#,##0 ;(#,##0)"
-		  numberingformat.value(38) = "#,##0 ;[Red](#,##0)"
-		  numberingformat.value(39) = "#,##0.00;(#,##0.00)"
-		  numberingformat.value(40) = "#,##0.00;[Red](#,##0.00)"
+		  formatList(37) = "#,##0 ;(#,##0)"
+		  formatList(38) = "#,##0 ;[Red](#,##0)"
+		  formatList(39) = "#,##0.00;(#,##0.00)"
+		  formatList(40) = "#,##0.00;[Red](#,##0.00)"
 		  
-		  numberingformat.value(45) = "mm:ss"
-		  numberingformat.value(46) = "[h]:mm:ss"
-		  numberingformat.value(47) = "mmss.0"
-		  numberingformat.value(48) = "##0.0E+0"
-		  numberingformat.value(49) = "@"
+		  formatList(45) = "mm:ss"
+		  formatList(46) = "[h]:mm:ss"
+		  formatList(47) = "mmss.0"
+		  formatList(48) = "##0.0E+0"
+		  formatList(49) = "@"
 		  
 		  
 		  //
 		  // Aditional formats
 		  //
-		  numberingformat.value(5 ) = "$#,##0\-$#,##0"
-		  numberingformat.value(6 ) = "$#,##0[Red]\-$#,##0"
-		  numberingformat.value(7 ) = "$#,##0.00\-$#,##0.00"
-		  numberingformat.value(8 ) = "$#,##0.00[Red]\-$#,##0.00"
+		  formatList(5 ) = "$#,##0\-$#,##0"
+		  formatList(6 ) = "$#,##0[Red]\-$#,##0"
+		  formatList(7 ) = "$#,##0.00\-$#,##0.00"
+		  formatList(8 ) = "$#,##0.00[Red]\-$#,##0.00"
 		  
-		  numberingformat.value(27 ) = "[$-404]e/m/d"
-		  numberingformat.value(30 ) = "m/d/yy"
-		  numberingformat.value(36 ) = "[$-404]e/m/d"
-		  numberingformat.value(50 ) = "[$-404]e/m/d"
-		  numberingformat.value(57 ) = "[$-404]e/m/d"
+		  formatList(27 ) = "[$-404]e/m/d"
+		  formatList(30 ) = "m/d/yy"
+		  formatList(36 ) = "[$-404]e/m/d"
+		  formatList(50 ) = "[$-404]e/m/d"
+		  formatList(57 ) = "[$-404]e/m/d"
 		  
-		  numberingformat.value(59 ) = "t0"
-		  numberingformat.value(60 ) = "t0.00"
-		  numberingformat.value(61 ) = "t#,##0"
-		  numberingformat.value(62 ) = "t#,##0.00"
-		  numberingformat.value(67 ) = "t0%"
-		  numberingformat.value(68 ) = "t0.00%"
-		  numberingformat.value(69 ) = "t# ?/?"
-		  numberingformat.value(70 ) = "t# ??/??"
+		  formatList(59 ) = "t0"
+		  formatList(60 ) = "t0.00"
+		  formatList(61 ) = "t#,##0"
+		  formatList(62 ) = "t#,##0.00"
+		  formatList(67 ) = "t0%"
+		  formatList(68 ) = "t0.00%"
+		  formatList(69 ) = "t# ?/?"
+		  formatList(70 ) = "t# ??/??"
 		  
-		  Return
-		   
+		  for index as integer = 0  to formatList.LastIndex
+		    if formatList(index) = "" then
+		      
+		    else
+		      NumberingFormat.value(index) = new clCellFormatter(formatList(index))
+		      
+		    end if
+		    
+		  next
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub Load()
+		  
+		  
+		  if self.UnzipToTemporary <> 0 then
+		    return
+		    
+		  end if
+		  
+		  
+		  
+		  self.LoadSharedStrings()
+		  self.LoadStyles()
+		  self.LoadWorkbookInfo()
 		  
 		End Sub
 	#tag EndMethod
@@ -213,8 +239,8 @@ Protected Class clWorkbook
 		End Sub
 	#tag EndMethod
 
-	#tag Method, Flags = &h0
-		Sub LoadNumFmts(baseNode as XMLNode)
+	#tag Method, Flags = &h1
+		Protected Sub LoadNumFmts(baseNode as XMLNode)
 		  
 		  self.CustomNumberingFormat = new Dictionary
 		  
@@ -227,7 +253,7 @@ Protected Class clWorkbook
 		      var formatcCode as string = x1.GetAttribute("formatCode")
 		      var id as integer = x1.GetAttribute("numFmtId").ToInteger
 		      
-		      self.CustomNumberingFormat.value(id) = formatcCode
+		      self.CustomNumberingFormat.value(id) = new clCellFormatter(formatcCode)
 		      
 		      
 		    end if
@@ -240,22 +266,19 @@ Protected Class clWorkbook
 		End Sub
 	#tag EndMethod
 
-	#tag Method, Flags = &h0
-		Sub LoadSharedStrings()
+	#tag Method, Flags = &h1
+		Protected Sub LoadSharedStrings()
 		  
 		  self.SharedStrings = new Dictionary
 		  
-		  var tmp as FolderItem = self.TempFolder
+		  var SharedStringXML as XMLDocument = self.OpenDocument(self.TempFolder, "xl","sharedStrings.xml")
 		  
-		  if tmp = nil then return
-		  
-		  
-		  var sharedstringxml as XMLDocument = new XMLDocument(tmp.Child("xl").child("sharedStrings.xml"))
+		  if SharedStringXML = nil then Return
 		  
 		  
-		  var x2 as xmlnode = sharedstringxml.FirstChild
+		  var x2 as xmlnode = SharedStringXML.FirstChild
 		  var lvl2 as integer = 0
-		  var strCounter as integer
+		  var strCounter as integer = 0
 		  
 		  while x2 <> nil 
 		    clWorkbook.WriteLog(CurrentMethodName ,lvl2, x2.name)
@@ -263,11 +286,37 @@ Protected Class clWorkbook
 		    if x2.name = "si" then 
 		      
 		      var x3 as XMLNode = x2.FirstChild
+		      var txt as string = ""
 		      
-		      SharedStrings.value(strCounter) = x3.FirstChild.Value
+		      while  x3 <> nil 
+		        
+		        if x3.name = "t" then
+		          var d as integer
+		           
+		          if x3.FirstChild <> nil then txt = x3.FirstChild.value
+		           
+		        end if
+		        
+		        if x3.name = "r" then
+		          var x4 as XmlNode = x3.FirstChild
+		          
+		          while x4 <> nil
+		            if x4.name = "t" and x4.FirstChild <> nil then txt = txt + x4.FirstChild.Value
+		            
+		            x4 = x4.NextSibling
+		            
+		          wend
+		          
+		        end if
+		        x3 = x3.NextSibling
+		      wend
+		      
+		      
+		      SharedStrings.value(strCounter) = txt.ReplaceAll(chr(10), self.InCellLineBreak)
 		      strCounter = strCounter + 1
 		      
 		    end if
+		     
 		    
 		    if x2.name = "sst" then
 		      self.ExpectedStringUniqueCount = x2.GetAttribute("uniqueCount").ToInteger
@@ -287,14 +336,14 @@ Protected Class clWorkbook
 		End Sub
 	#tag EndMethod
 
-	#tag Method, Flags = &h0
-		Sub LoadStyles()
+	#tag Method, Flags = &h1
+		Protected Sub LoadStyles()
 		  
-		  var tmp as FolderItem = self.TempFolder
 		  
-		  if tmp = nil then return
+		  var StyleXml as XMLDocument = self.OpenDocument(self.TempFolder, "xl","styles.xml")
 		  
-		  var StyleXml as XMLDocument = new XMLDocument(tmp.Child("xl").child("styles.xml"))
+		  if StyleXml = nil then Return
+		  
 		  
 		  var x1 as xmlnode = StyleXml.FirstChild
 		  var lvl1 as integer = 0
@@ -363,17 +412,16 @@ Protected Class clWorkbook
 		End Sub
 	#tag EndMethod
 
-	#tag Method, Flags = &h0
-		Sub LoadWorkbookInfo()
-		  
-		  var tmp as FolderItem = self.TempFolder
-		  
-		  if tmp = nil then return
+	#tag Method, Flags = &h1
+		Protected Sub LoadWorkbookInfo()
 		  
 		  
-		  var workbookxml as XMLDocument = new XMLDocument(tmp.Child("xl").child("workbook.xml"))
+		  var WorkbookXML as XMLDocument = self.OpenDocument(self.TempFolder, "xl","workbook.xml")
 		  
-		  var x1 as xmlnode = workbookxml.FirstChild
+		  if WorkbookXML = nil then return 
+		  
+		  
+		  var x1 as xmlnode = WorkbookXML.FirstChild
 		  var lvl1 as integer = 0
 		  
 		  while x1 <> nil 
@@ -410,7 +458,27 @@ Protected Class clWorkbook
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function UnzipToTemporary() As integer
+		Shared Function OpenDocument(BaseFolder as FolderItem, paramarray levels as string) As XMLDocument
+		  
+		  if BaseFolder = nil then return nil
+		  
+		  
+		  var fld as FolderItem = BaseFolder
+		  
+		  for each level as string in levels
+		    if not fld.Child(level).Exists then return nil
+		    fld = fld.child(level)
+		    
+		  next
+		  
+		  return new XMLDocument(fld)
+		  
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
+		Protected Function UnzipToTemporary() As integer
 		  
 		  var file as FolderItem = self.SourceFile
 		  
@@ -457,6 +525,68 @@ Protected Class clWorkbook
 	#tag EndMethod
 
 
+	#tag Note, Name = Loading shared string
+		
+		Base (simple) case:
+		
+		
+		Under the tag "sst", we have an array of "si", each <si> </si> entry is one string. Array is implicitely indexed, starting at zero
+		
+		<sst ....>
+		   <si>
+		      <t>simple text</t>
+		   </si>
+		</sst>
+		
+		
+		A text may be formatted and contain characters from different fonts, for example the text "Company公司名:" is stored as:
+		
+		<si>
+		        <r>
+		            <rPr>
+		                <b></b>
+		                <sz val="12"></sz>
+		                <color rgb="FF000000"></color>
+		                <rFont val="Arial"></rFont>
+		                <family val="2"></family>
+		            </rPr>
+		            <t>Company</t>
+		        </r>
+		        <r>
+		            <rPr>
+		                <b></b>
+		                <sz val="12"></sz>
+		                <color rgb="FF000000"></color>
+		                <rFont val="宋体"></rFont>
+		                <charset val="134"></charset>
+		            </rPr>
+		            <t>公司名</t>
+		        </r>
+		        <r>
+		            <rPr>
+		                <b></b>
+		                <sz val="12"></sz>
+		                <color rgb="FF000000"></color>
+		                <rFont val="Arial"></rFont>
+		                <family val="2"></family>
+		            </rPr>
+		            <t>:</t>
+		        </r>
+		    </si>
+		
+		
+		We concatenate all elements of the <t>..</t> found in the <si> ..</si> without taking the font selection or the formatting information (color, size, ...)
+		
+		'In cell' line breakj (chr(10) are replaced by a single space. 
+		
+		
+		
+		
+		
+		
+	#tag EndNote
+
+
 	#tag Property, Flags = &h0
 		CellXf As Dictionary
 	#tag EndProperty
@@ -471,6 +601,10 @@ Protected Class clWorkbook
 
 	#tag Property, Flags = &h0
 		ExpectedStringUniqueCount As Integer
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
+		InCellLineBreak As string
 	#tag EndProperty
 
 	#tag Property, Flags = &h0

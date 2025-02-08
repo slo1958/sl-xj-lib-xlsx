@@ -68,7 +68,7 @@ Protected Class clWorksheet
 
 	#tag Method, Flags = &h1
 		Protected Sub LoadSheetDataCell(basenode as XMLNode)
-		   
+		  
 		  const cFormula as string = "f"
 		  const cCellValue as string = "v"
 		  const cRichText as string = "is"
