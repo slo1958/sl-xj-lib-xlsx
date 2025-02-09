@@ -1,67 +1,71 @@
 #tag Class
-Protected Class clCellXf
+Protected Class clWorkSheetRef
 	#tag Method, Flags = &h0
-		Sub Constructor(StyleMode as boolean, xfNode as xmlNode)
+		Sub Constructor(SourceFolder as folderitem, SheetName as string, SheetId as integer, SheetRelationId as string, SheetRelationTarget as string)
 		  
-		  self.IsStyle = StyleMode
+		  self.TempFolder = SourceFolder
+		  self.name = SheetName
+		  self.id = SheetId
+		  self.RelationId = SheetRelationId
+		  self.RelationTarget = SheetRelationTarget
+		  self.SheetData = nil
 		  
-		  self.FontId = xfNode.GetAttribute("fondId") .ToInteger
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function GetSheetData() As clWorksheet
 		  
-		  self.FillId = xfNode.GetAttribute("fillId") .ToInteger
+		  if not IsLoaded then
+		    self.LoadSheetData()
+		    
+		  end if
 		  
-		  self.BorderId = xfNode.GetAttribute("borderId").ToInteger
+		  Return SheetData
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function IsLoaded() As Boolean
 		  
-		  self.NumberFormatId = xfNode.GetAttribute("numFmtId").ToInteger
+		  return SheetData <> nil
 		  
-		  self.ApplyFont = xfNode.GetAttribute("applyFont").ToInteger = 1
-		  
-		  self.ApplyFill = xfNode.GetAttribute("applyFill").ToInteger = 1
-		  
-		  self.ApplyBorder = xfNode.GetAttribute("applyBorder").ToInteger = 1
-		  
-		  self.ApplyNumberFormat = xfNode.GetAttribute("applyNumberFormat").ToInteger = 1
-		  
-		  return
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub LoadSheetData()
 		  
 		  
+		  self.SheetData = new clWorksheet(TempFolder, Name, RelationTarget)
+		  
+		  return 
 		End Sub
 	#tag EndMethod
 
 
 	#tag Property, Flags = &h0
-		ApplyBorder As Boolean
+		Id As Integer
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
-		ApplyFill As Boolean
+		Name As string
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
-		ApplyFont As Boolean
+		RelationId As string
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
-		ApplyNumberFormat As Boolean
+		RelationTarget As string
 	#tag EndProperty
 
-	#tag Property, Flags = &h0
-		BorderId As Integer
+	#tag Property, Flags = &h1
+		Protected SheetData As clWorksheet
 	#tag EndProperty
 
-	#tag Property, Flags = &h0
-		FillId As Integer
-	#tag EndProperty
-
-	#tag Property, Flags = &h0
-		FontId As Integer
-	#tag EndProperty
-
-	#tag Property, Flags = &h0
-		IsStyle As Boolean
-	#tag EndProperty
-
-	#tag Property, Flags = &h0
-		NumberFormatId As Integer
+	#tag Property, Flags = &h1
+		Protected TempFolder As FolderItem
 	#tag EndProperty
 
 
@@ -107,7 +111,7 @@ Protected Class clCellXf
 			EditorType=""
 		#tag EndViewProperty
 		#tag ViewProperty
-			Name="IsStyle"
+			Name="Name"
 			Visible=false
 			Group="Behavior"
 			InitialValue=""

@@ -245,8 +245,6 @@ Protected Class clCellFormatter
 		    
 		  end if
 		  
-		  System.DebugLog(format + " == " + f2)
-		  
 		  for i as integer = 0 to f2.Length
 		    var c as String = f2.Middle(i,1)
 		    
@@ -278,7 +276,7 @@ Protected Class clCellFormatter
 		  
 		  if f2.IndexOf(";") >=0  then
 		    var f3() as string = f2.Split(";")
-		     
+		    
 		    for each f3element as string in f3
 		      if f3element.left(2)="[$" then // remove local mark
 		        var idx as integer = f3element.IndexOf("]")
@@ -291,7 +289,7 @@ Protected Class clCellFormatter
 		      end if
 		      
 		    next
-		     return
+		    return
 		    
 		  end if
 		  
@@ -633,6 +631,14 @@ Protected Class clCellFormatter
 			InitialValue=""
 			Type="String"
 			EditorType="MultiLineEditor"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="IsDateFormat"
+			Visible=false
+			Group="Behavior"
+			InitialValue=""
+			Type="Boolean"
+			EditorType=""
 		#tag EndViewProperty
 	#tag EndViewBehavior
 End Class

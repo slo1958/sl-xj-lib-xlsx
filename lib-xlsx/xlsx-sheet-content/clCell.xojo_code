@@ -133,7 +133,7 @@ Protected Class clCell
 		      var format as clCellFormatter = wb.GetFormat(style.NumberFormatId)
 		      d=2
 		    end if
-		     
+		    
 		    
 		    var fmt as clCellFormatter = wb.GetFormat(style.NumberFormatId)
 		    

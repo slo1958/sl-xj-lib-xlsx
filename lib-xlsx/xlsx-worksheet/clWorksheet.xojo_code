@@ -21,12 +21,11 @@ Protected Class clWorksheet
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub Constructor(WorkFolder as folderItem, SheetName as string, SheetID as integer)
+		Sub Constructor(WorkFolder as folderItem, SheetName as string, SheetFilePath as string)
 		  
 		  self.Name = SheetName
-		  self.Id = SheetID
 		  
-		  self.Filename = "sheet" + str(sheetID)+".xml"
+		  self.FilePath = SheetFilePath.Split("/")
 		  
 		  self.SourceFolder = WorkFolder
 		  
@@ -131,9 +130,12 @@ Protected Class clWorksheet
 		  
 		  tmp = tmp.child("xl")
 		  
-		  tmp = tmp.child("worksheets")
+		  for each child as string in self.FilePath
+		    tmp = tmp.Child(child)
+		    
+		  next
 		  
-		  var worksheetxml as XMLDocument = new XMLDocument(tmp.Child(self.Filename))
+		  var worksheetxml as XMLDocument = new XMLDocument(tmp)
 		  
 		  var x1 as xmlnode = worksheetxml.FirstChild
 		  var lvl as integer = 0
@@ -159,11 +161,7 @@ Protected Class clWorksheet
 
 
 	#tag Property, Flags = &h0
-		Filename As string
-	#tag EndProperty
-
-	#tag Property, Flags = &h0
-		Id As Integer
+		FilePath() As string
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
@@ -225,20 +223,12 @@ Protected Class clWorksheet
 			EditorType=""
 		#tag EndViewProperty
 		#tag ViewProperty
-			Name="Filename"
+			Name="FilePath()"
 			Visible=false
 			Group="Behavior"
 			InitialValue=""
 			Type="string"
 			EditorType="MultiLineEditor"
-		#tag EndViewProperty
-		#tag ViewProperty
-			Name="Id"
-			Visible=false
-			Group="Behavior"
-			InitialValue=""
-			Type="Integer"
-			EditorType=""
 		#tag EndViewProperty
 		#tag ViewProperty
 			Name="lastColumn"

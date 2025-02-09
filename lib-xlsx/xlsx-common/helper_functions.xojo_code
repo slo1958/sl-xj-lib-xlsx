@@ -1,5 +1,5 @@
 #tag Module
-Protected Module Module1
+Protected Module helper_functions
 	#tag Method, Flags = &h0
 		Function AddChildNode(xml as XMLDocument, name as string, attribute as string, value as string) As XmlNode
 		  var aNode as XMLNode = xml.CreateElement(name)

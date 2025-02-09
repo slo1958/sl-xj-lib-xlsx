@@ -1,25 +1,78 @@
 #tag Class
 Protected Class clWorkbook
 	#tag Method, Flags = &h0
-		Sub Constructor(file as FolderItem, workfolder as FolderItem = nil, DeferredLoad as boolean = False, language as string = "")
+		Sub Constructor(file as FolderItem, LoadMode as LoadModes = LoadModes.FullLoad, language as string = "", workfolder as FolderItem = nil)
+		  //
+		  // Initialize and  load information about the workbook
+		  // - Relations
+		  // - shared strings (assuming fixed path and file name, should take from relations)
+		  // - Styles (assuming fixed path and file name, should take from relations)
+		  // - Sheet references
+		  //   Sheet data are loaded is load mode is not SheetOnDemand
+		  //
+		  // Parameters:
+		  // - source file (expected to be a .xlsx file)
+		  // - loadmode 
+		  // - language info (not used)
+		  // - path to workfolder (or nil)
+		  //
+		  // Returns
+		  // (nothing)
+		  //
 		  
 		  self.InCellLineBreak = " "
+		  
+		  self.TraceLoadSharedStrings = True
 		  
 		  self.SourceFile = file
 		  self.TempFolder = workfolder
 		  
 		  self.InitInternals(language)
 		  
-		  if not DeferredLoad then
-		    self.load
-		    
-		  end if
+		  if LoadMode = LoadModes.Manual then return
+		  
+		  self.load(LoadMode)
 		  
 		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Function FindRelation(RelationId as string) As clWorkbookRelation
+		  //
+		  // Find an entry in relation table based on relation ID
+		  //
+		  // Used to find the path to sheet files
+		  //
+		  // Parameters:
+		  // - relation id
+		  //
+		  // Returns:
+		  // relation object or nil
+		  //
+		  
+		  for each rel as clWorkbookRelation in self.Relations
+		    if rel.ID = RelationId then return rel
+		    
+		  next
+		  
+		  return nil
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Function GetCellStyle(styleIndex as integer) As clCellXf
+		  
+		  //
+		  // Find an entry in the style dictionary table based on style index
+		  //
+		  // Parameters:
+		  // - style index
+		  //
+		  // Returns:
+		  // style object or nil
+		  //
+		  
 		  
 		  return self.CellXf.Lookup(styleIndex, nil)
 		End Function
@@ -28,11 +81,23 @@ Protected Class clWorkbook
 	#tag Method, Flags = &h0
 		Function GetFormat(formatIndex as integer) As clCellFormatter
 		  
+		  //
+		  // Find an entry in the number format dictionaries table based on format index
+		  //
+		  // Parameters:
+		  // - format index
+		  //
+		  // Returns:
+		  // format object or nil
+		  //
+		  
+		  
+		  
 		  if self.NumberingFormat.HasKey(formatIndex) then
-		    return self.NumberingFormat.lookup(formatIndex, "")
+		    return self.NumberingFormat.lookup(formatIndex, nil)
 		    
 		  else
-		    Return self.CustomNumberingFormat.lookup(formatIndex, "")
+		    Return self.CustomNumberingFormat.lookup(formatIndex, nil)
 		    
 		  end if
 		  
@@ -42,6 +107,17 @@ Protected Class clWorkbook
 	#tag Method, Flags = &h0
 		Function GetSharedString(stringIndex as integer) As String
 		  
+		  //
+		  // Find an entry in the shared string dictionary based on the string index
+		  //
+		  // Parameters:
+		  // - string index
+		  //
+		  // Returns:
+		  //  string (empty string if missing)
+		  //
+		  
+		  
 		  return self.SharedStrings.Lookup(stringIndex, "")
 		  
 		End Function
@@ -50,12 +126,27 @@ Protected Class clWorkbook
 	#tag Method, Flags = &h0
 		Function GetSheet(name as string) As clWorksheet
 		  
-		  for each sheet as clWorksheet in self.sheets
-		    if sheet.Name = name then Return sheet
+		  //
+		  // Find an entry in the table of worksheetref  based on sheet name
+		  //
+		  // Parameters:
+		  // - sheet name
+		  //
+		  // Returns:
+		  //  clWorksheet object or nil
+		  //
+		  
+		  
+		  var SheetRef as clWorkSheetRef
+		  
+		  for each sheet as clWorkSheetRef in self.SheetRefs
+		    if sheet.Name = name then SheetRef = sheet
 		    
 		  next
 		  
-		  return nil
+		  if SheetRef = nil then return nil
+		  
+		  return SheetRef.GetSheetData
 		  
 		  
 		End Function
@@ -63,9 +154,18 @@ Protected Class clWorkbook
 
 	#tag Method, Flags = &h0
 		Function GetSheetNames() As string()
+		  //
+		  // Get the list of known sheet names
+		  //
+		  // Parameters
+		  // (nothing)
+		  //
+		  // Returns
+		  // array of strings, sheet name
+		  //
 		  var ret() as string
 		  
-		  for each sheet as clWorksheet in self.sheets
+		  for each sheet as clWorkSheetRef in self.SheetRefs
 		    ret.Add(sheet.Name)
 		    
 		  next
@@ -194,25 +294,111 @@ Protected Class clWorkbook
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub Load()
-		  
+		Sub Load(LoadMode as LoadModes)
+		  //
+		  // load information about the workbook
+		  // - Relations
+		  // - shared strings (assuming fixed path and file name, should take from relations)
+		  // - Styles (assuming fixed path and file name, should take from relations)
+		  // - Sheet references
+		  //   Sheet data are loaded is load mode is not SheetOnDemand
+		  //
+		  // Parameters:
+		  // - loadmode 
+		  //
+		  // Returns
+		  // (nothing)
 		  
 		  if self.UnzipToTemporary <> 0 then
 		    return
 		    
 		  end if
 		  
+		  self.LoadWorkBookRelations()
 		  
-		  
-		  self.LoadSharedStrings()
+		  self.LoadSharedStrings() 
 		  self.LoadStyles()
-		  self.LoadWorkbookInfo()
+		  
+		  
+		  self.LoadWorkbookInfo(LoadMode)
 		  
 		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Sub LoadCellXfs(basenode as XMLNode)
+		Protected Sub LoadSharedStrings()
+		  
+		  self.SharedStrings = new Dictionary
+		  
+		  var SharedStringXML as XMLDocument = self.OpenDocument(self.TempFolder, "xl","sharedStrings.xml")
+		  
+		  if SharedStringXML = nil then Return
+		  
+		  
+		  var x2 as xmlnode = SharedStringXML.FirstChild
+		  var lvl2 as integer = 0
+		  var strCounter as integer = 0
+		  
+		  while x2 <> nil 
+		    if TraceLoadSharedStrings then clWorkbook.WriteLog(CurrentMethodName ,lvl2, x2.name)
+		    
+		    if x2.name = "si" then 
+		      
+		      var x3 as XMLNode = x2.FirstChild
+		      var txt as string = ""
+		      
+		      while  x3 <> nil 
+		        
+		        if x3.name = "t" then
+		          var d as integer
+		          
+		          if x3.FirstChild <> nil then txt = x3.FirstChild.value
+		          
+		        end if
+		        
+		        if x3.name = "r" then
+		          var x4 as XmlNode = x3.FirstChild
+		          
+		          while x4 <> nil
+		            if x4.name = "t" and x4.FirstChild <> nil then txt = txt + x4.FirstChild.Value
+		            
+		            x4 = x4.NextSibling
+		            
+		          wend
+		          
+		        end if
+		        x3 = x3.NextSibling
+		      wend
+		      
+		      
+		      SharedStrings.value(strCounter) = txt.ReplaceAll(chr(10), self.InCellLineBreak)
+		      strCounter = strCounter + 1
+		      
+		    end if
+		    
+		    
+		    if x2.name = "sst" then
+		      self.ExpectedStringUniqueCount = x2.GetAttribute("uniqueCount").ToInteger
+		      self.ExpectedStringCount = x2.GetAttribute("count").ToInteger
+		      
+		      x2 = x2.FirstChild
+		      
+		    else
+		      x2 = x2.NextSibling
+		      
+		    end if
+		    
+		  wend
+		  
+		  if self.TraceLoadSharedStrings then Writelog(CurrentMethodName,0, "Loaded " + str(strCounter)  + " items.")
+		  
+		  return
+		  
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
+		Protected Sub LoadStyleCellXfs(basenode as XMLNode)
 		  
 		  CellXf  = new Dictionary
 		  
@@ -240,7 +426,7 @@ Protected Class clWorkbook
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Sub LoadNumFmts(baseNode as XMLNode)
+		Protected Sub LoadStyleNumFmts(baseNode as XMLNode)
 		  
 		  self.CustomNumberingFormat = new Dictionary
 		  
@@ -263,74 +449,6 @@ Protected Class clWorkbook
 		  wend
 		  
 		  
-		End Sub
-	#tag EndMethod
-
-	#tag Method, Flags = &h1
-		Protected Sub LoadSharedStrings()
-		  
-		  self.SharedStrings = new Dictionary
-		  
-		  var SharedStringXML as XMLDocument = self.OpenDocument(self.TempFolder, "xl","sharedStrings.xml")
-		  
-		  if SharedStringXML = nil then Return
-		  
-		  
-		  var x2 as xmlnode = SharedStringXML.FirstChild
-		  var lvl2 as integer = 0
-		  var strCounter as integer = 0
-		  
-		  while x2 <> nil 
-		    clWorkbook.WriteLog(CurrentMethodName ,lvl2, x2.name)
-		    
-		    if x2.name = "si" then 
-		      
-		      var x3 as XMLNode = x2.FirstChild
-		      var txt as string = ""
-		      
-		      while  x3 <> nil 
-		        
-		        if x3.name = "t" then
-		          var d as integer
-		           
-		          if x3.FirstChild <> nil then txt = x3.FirstChild.value
-		           
-		        end if
-		        
-		        if x3.name = "r" then
-		          var x4 as XmlNode = x3.FirstChild
-		          
-		          while x4 <> nil
-		            if x4.name = "t" and x4.FirstChild <> nil then txt = txt + x4.FirstChild.Value
-		            
-		            x4 = x4.NextSibling
-		            
-		          wend
-		          
-		        end if
-		        x3 = x3.NextSibling
-		      wend
-		      
-		      
-		      SharedStrings.value(strCounter) = txt.ReplaceAll(chr(10), self.InCellLineBreak)
-		      strCounter = strCounter + 1
-		      
-		    end if
-		     
-		    
-		    if x2.name = "sst" then
-		      self.ExpectedStringUniqueCount = x2.GetAttribute("uniqueCount").ToInteger
-		      self.ExpectedStringCount = x2.GetAttribute("count").ToInteger
-		      
-		      x2 = x2.FirstChild
-		      
-		    else
-		      x2 = x2.NextSibling
-		      
-		    end if
-		    
-		  wend
-		  
 		  return
 		  
 		End Sub
@@ -342,8 +460,10 @@ Protected Class clWorkbook
 		  
 		  var StyleXml as XMLDocument = self.OpenDocument(self.TempFolder, "xl","styles.xml")
 		  
-		  if StyleXml = nil then Return
-		  
+		  if StyleXml = nil then 
+		    self.Writelog(CurrentMethodName,-1,"Cannot find <styles.xml>")
+		    Return
+		  end if
 		  
 		  var x1 as xmlnode = StyleXml.FirstChild
 		  var lvl1 as integer = 0
@@ -364,17 +484,17 @@ Protected Class clWorkbook
 		      self.LoadStyleXfs(x1)
 		      
 		    elseif x1.name = "cellXfs" then
-		      self.LoadCellXfs(x1)
+		      self.LoadStyleCellXfs(x1)
 		      
 		    elseif x1.name = "cellStyles" then
 		      
 		      
 		      
 		    elseif x1.name = "numFmts" then  
-		      self.LoadNumFmts(x1)
+		      self.LoadStyleNumFmts(x1)
 		      
 		    else
-		      System.DebugLog(">>>" + CurrentMethodName+":" + x1.name)
+		      System.DebugLog(CurrentMethodName+":" + x1.name)
 		      
 		    end if
 		    
@@ -413,13 +533,26 @@ Protected Class clWorkbook
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Sub LoadWorkbookInfo()
-		  
+		Protected Sub LoadWorkbookInfo(LoadMode as LoadModes)
+		  //
+		  // load information from workbook.xml
+		  // - Sheet references
+		  //   Sheet data are loaded is load mode is not SheetOnDemand
+		  //
+		  // Parameters:
+		  // - loadmode 
+		  //
+		  // Returns
+		  // (nothing)
+		  //
 		  
 		  var WorkbookXML as XMLDocument = self.OpenDocument(self.TempFolder, "xl","workbook.xml")
 		  
-		  if WorkbookXML = nil then return 
-		  
+		  if WorkbookXML = nil then 
+		    self.Writelog(CurrentMethodName,-1,"Cannot find <workbook.xml>")
+		    return
+		     
+		  end if
 		  
 		  var x1 as xmlnode = WorkbookXML.FirstChild
 		  var lvl1 as integer = 0
@@ -430,10 +563,14 @@ Protected Class clWorkbook
 		    if x1.name = "sheet" then
 		      var name as string = x1.GetAttribute("name")
 		      var sheetid as string = x1.GetAttribute("sheetId")
-		      var rid as String = x1.GetAttribute("r:id")
-		      sheets.Add(new clWorksheet( self.TempFolder, name, sheetid.ToInteger))
+		      var RelationId as String = x1.GetAttribute("r:id")
+		      var RelationTarget as string = self.FindRelation(RelationId).Target
+		      self.SheetRefs.add(new clWorkSheetRef(self.TempFolder, name, SheetId.ToInteger, RelationId, RelationTarget))
 		      
-		      
+		      if LoadMode =LoadModes.FullLoad then
+		        Self.SheetRefs(self.SheetRefs.LastIndex).LoadSheetData()
+		        
+		      end if
 		      
 		    end if
 		    
@@ -454,6 +591,50 @@ Protected Class clWorkbook
 		  wend
 		  
 		  return
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
+		Protected Sub LoadWorkBookRelations()
+		  
+		  
+		  
+		  var WorkbookRelXML as XMLDocument = self.OpenDocument(self.TempFolder, "xl","_rels","workbook.xml.rels")
+		  
+		  if WorkbookRelXML = nil then 
+		    self.Writelog(CurrentMethodName,-1,"Cannot find <workbook.xml.rels>")
+		    return
+		    
+		  end if
+		  
+		  var x2 as xmlnode = WorkbookRelXML.FirstChild
+		  var lvl2 as integer = 0
+		  var strCounter as integer = 0
+		  
+		  while x2 <> nil 
+		    clWorkbook.WriteLog(CurrentMethodName ,lvl2, x2.name)
+		    
+		    if x2.name = "Relationship" then 
+		      var relId as string = x2.GetAttribute("Id")
+		      var reltype as string = x2.GetAttribute("Type")
+		      var relTarget as string = x2.GetAttribute("Target")
+		      
+		      self.Relations.add(new clWorkbookRelation(relId, reltype, relTarget))
+		      
+		    end if
+		    
+		    if x2.name = "Relationships" then
+		      x2 = x2.FirstChild
+		      
+		    else 
+		      x2 = x2.NextSibling
+		      
+		    end if
+		    
+		  wend
+		  
+		  return
+		  
 		End Sub
 	#tag EndMethod
 
@@ -484,7 +665,8 @@ Protected Class clWorkbook
 		  
 		  if self.TempFolder = nil then
 		    
-		    self.TempFolder  = SpecialFolder.Desktop //SpecialFolder.Temporary
+		    self.TempFolder  =  SpecialFolder.Temporary
+		    
 		    
 		    // prepare work area
 		    
@@ -492,13 +674,13 @@ Protected Class clWorkbook
 		    
 		    if self.TempFolder.Exists then self.TempFolder.RemoveFolderAndContents
 		    
-		    self.TempFolder.CreateFolder
-		    
 		    if not file.Exists then Return -1
 		    
 		    if file.IsFolder then return -2
 		    
 		  end if
+		  
+		  if not self.TempFolder.Exists then self.TempFolder.CreateFolder
 		  
 		  file.Unzip(self.TempFolder )
 		  
@@ -511,9 +693,9 @@ Protected Class clWorkbook
 		Shared Sub Writelog(Source as string, level as integer, message as string)
 		  var ignored() as string
 		  
-		  ignored.add("Module1.clWorksheet.")
-		  ignored.add("Module1.clWorkbook.LoadSharedString")
-		  ignored.add("Module1.clWorkbook.LoadWorkbookInfo")
+		  ignored.add("clWorksheet.")
+		  ignored.add("clWorkbook.LoadSharedString")
+		  ignored.add("clWorkbook.LoadWorkbookInfo")
 		  
 		  for each ignore as string in ignored
 		    if source.IndexOf(ignore) >=0 then return
@@ -611,12 +793,16 @@ Protected Class clWorkbook
 		NumberingFormat As Dictionary
 	#tag EndProperty
 
+	#tag Property, Flags = &h1
+		Protected Relations() As clWorkbookRelation
+	#tag EndProperty
+
 	#tag Property, Flags = &h0
 		SharedStrings As Dictionary
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
-		Sheets() As clWorksheet
+		SheetRefs() As clWorkSheetRef
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
@@ -630,6 +816,17 @@ Protected Class clWorkbook
 	#tag Property, Flags = &h0
 		TempFolder As FolderItem
 	#tag EndProperty
+
+	#tag Property, Flags = &h0
+		TraceLoadSharedStrings As Boolean
+	#tag EndProperty
+
+
+	#tag Enum, Name = LoadModes, Type = Integer, Flags = &h0
+		Manual
+		  FullLoad
+		LoadSheetOnDemand
+	#tag EndEnum
 
 
 	#tag ViewBehavior
@@ -688,6 +885,14 @@ Protected Class clWorkbook
 			InitialValue=""
 			Type="Integer"
 			EditorType=""
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="InCellLineBreak"
+			Visible=false
+			Group="Behavior"
+			InitialValue=""
+			Type="string"
+			EditorType="MultiLineEditor"
 		#tag EndViewProperty
 	#tag EndViewBehavior
 End Class

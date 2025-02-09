@@ -47,7 +47,7 @@ Begin DesktopWindow Window1
       HasHorizontalScrollbar=   False
       HasVerticalScrollbar=   True
       HeadingIndex    =   -1
-      Height          =   316
+      Height          =   279
       Index           =   -2147483648
       InitialValue    =   ""
       Italic          =   False
@@ -64,7 +64,7 @@ Begin DesktopWindow Window1
       TabPanelIndex   =   0
       TabStop         =   True
       Tooltip         =   ""
-      Top             =   72
+      Top             =   109
       Transparent     =   False
       Underline       =   False
       Visible         =   True
@@ -83,7 +83,7 @@ Begin DesktopWindow Window1
       Index           =   -2147483648
       InitialValue    =   ""
       Italic          =   False
-      Left            =   42
+      Left            =   35
       LockBottom      =   False
       LockedInPosition=   False
       LockLeft        =   True
@@ -95,7 +95,7 @@ Begin DesktopWindow Window1
       TabPanelIndex   =   0
       TabStop         =   True
       Tooltip         =   ""
-      Top             =   20
+      Top             =   67
       Transparent     =   False
       Underline       =   False
       Visible         =   True
@@ -131,19 +131,113 @@ Begin DesktopWindow Window1
       Transparent     =   False
       Underline       =   False
       Visible         =   True
-      Width           =   223
+      Width           =   545
    End
 End
 #tag EndDesktopWindow
 
 #tag WindowCode
+	#tag Event
+		Sub Opening()
+		  
+		  var no as integer = 3
+		  
+		  select case no 
+		    
+		  case 0
+		    ProcessXLSXFileAuto( "test_file_1.xlsx")
+		    
+		  case 1
+		    ProcessXLSXFileOnDemand( "test_file_1.xlsx")
+		    
+		  case 2
+		    ProcessXLSXFileAuto( "test_file_2.xlsx")
+		    
+		  case 3
+		    ProcessXLSXFileOnDemand( "test_file_2.xlsx")
+		    
+		  end select
+		  
+		  return
+		End Sub
+	#tag EndEvent
+
+
+	#tag Method, Flags = &h0
+		Sub ProcessXLSXFileAuto(filename as string)
+		  //
+		  // Example load workbook, 
+		  // - auto mode 
+		  // - use temporary folder as workarea
+		  //
+		  
+		  var fld as FolderItem = findTestDataFolder
+		  
+		  fld = fld.Child(filename)
+		  
+		  if not fld.Exists then Return
+		  
+		  self.loadedWorkbook = new clWorkbook(fld )
+		  
+		  self.UpdateUI
+		  
+		  return
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub ProcessXLSXFileOnDemand(filename as string)
+		  //
+		  // Example load workbook, 
+		  // - SheetOnDemand mode 
+		  // - use desktop folder as workarea
+		  //
+		  
+		  var fld as FolderItem = findTestDataFolder
+		  
+		  fld = fld.Child(filename)
+		  
+		  if not fld.Exists then Return
+		  
+		  self.loadedWorkbook = new clWorkbook(fld _
+		  , clWorkbook.LoadModes.LoadSheetOnDemand _
+		  , "" _
+		   , SpecialFolder.Desktop.child(filename.ReplaceAll(".","-") + " folder") _
+		  )
+		  
+		  self.UpdateUI
+		  
+		  return
+		End Sub
+	#tag EndMethod
+
 	#tag Method, Flags = &h0
 		Sub ShowSheet(sheetname as string)
 		  
-		  var sheet as Module1.clWorksheet
+		  var sheet as clWorksheet
 		  
 		End Sub
 	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub UpdateUI()
+		  
+		  
+		  popupmenu1.RemoveAllRows
+		  
+		  var sheets() as string = self.loadedWorkbook.GetSheetNames
+		  
+		  popupmenu1.AddAllRows(sheets)
+		  
+		  popupmenu1.SelectedRowIndex = 0
+		  
+		End Sub
+	#tag EndMethod
+
+
+	#tag Property, Flags = &h0
+		loadedWorkbook As clWorkbook
+	#tag EndProperty
 
 
 #tag EndWindowCode
@@ -167,24 +261,11 @@ End
 #tag EndEvents
 #tag Events PopupMenu1
 	#tag Event
-		Sub Opening()
-		  
-		  me.RemoveAllRows
-		  
-		  var sheets() as string = app.loadedWorkbook.GetSheetNames
-		  
-		  me.AddAllRows(sheets)
-		  
-		  me.SelectedRowIndex = 0
-		  
-		End Sub
-	#tag EndEvent
-	#tag Event
 		Sub SelectionChanged(item As DesktopMenuItem)
 		  Const colBase as string = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 		  var name as string = me.SelectedRowText
 		  
-		  var sheet as Module1.clWorksheet = app.loadedWorkbook.GetSheet(name)
+		  var sheet as clWorksheet = self.loadedWorkbook.GetSheet(name)
 		  
 		  ListBox1.RemoveAllRows
 		  
@@ -200,15 +281,15 @@ End
 		  next
 		  
 		  
-		  for each row as Module1.clWorkrow in sheet.rows
+		  for each row as clWorkrow in sheet.rows
 		    
 		    if row <> nil then
 		      Listbox1.AddRow str(row.row)
 		      
 		      for col as integer = 1 to sheet.lastColumn
-		        var rc as Module1.clCell = row.GetCell(col)
+		        var rc as clCell = row.GetCell(col)
 		        var tmp as string 
-		        if rc <> nil then tmp = rc.GetValueAsString(app.loadedWorkbook)
+		        if rc <> nil then tmp = rc.GetValueAsString(self.loadedWorkbook)
 		        
 		        Listbox1.CellTextAt(listbox1.LastAddedRowIndex, col) = tmp
 		        
