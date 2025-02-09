@@ -20,118 +20,179 @@ Begin DesktopWindow Window1
    MinimumHeight   =   64
    MinimumWidth    =   64
    Resizeable      =   True
-   Title           =   "Untitled"
+   Title           =   "Demo"
    Type            =   0
    Visible         =   True
    Width           =   600
-   Begin DesktopListBox ListBox1
+   Begin DesktopTabPanel TabPanel1
       AllowAutoDeactivate=   True
-      AllowAutoHideScrollbars=   True
-      AllowExpandableRows=   False
-      AllowFocusRing  =   True
-      AllowResizableColumns=   False
-      AllowRowDragging=   False
-      AllowRowReordering=   False
       Bold            =   False
-      ColumnCount     =   1
-      ColumnWidths    =   ""
-      DefaultRowHeight=   -1
-      DropIndicatorVisible=   False
       Enabled         =   True
       FontName        =   "System"
       FontSize        =   0.0
       FontUnit        =   0
-      GridLineStyle   =   0
-      HasBorder       =   True
-      HasHeader       =   True
-      HasHorizontalScrollbar=   False
-      HasVerticalScrollbar=   True
-      HeadingIndex    =   -1
-      Height          =   279
+      Height          =   368
       Index           =   -2147483648
-      InitialValue    =   ""
       Italic          =   False
-      Left            =   35
+      Left            =   20
       LockBottom      =   True
       LockedInPosition=   False
       LockLeft        =   True
       LockRight       =   True
       LockTop         =   True
-      RequiresSelection=   False
-      RowSelectionType=   0
+      Panels          =   ""
       Scope           =   0
-      TabIndex        =   0
+      SmallTabs       =   False
+      TabDefinition   =   "Extract cells\rTabular sheets\rForm"
+      TabIndex        =   3
       TabPanelIndex   =   0
       TabStop         =   True
       Tooltip         =   ""
-      Top             =   109
+      Top             =   20
       Transparent     =   False
       Underline       =   False
+      Value           =   1
       Visible         =   True
-      Width           =   545
-      _ScrollOffset   =   0
-      _ScrollWidth    =   -1
-   End
-   Begin DesktopPopupMenu PopupMenu1
-      AllowAutoDeactivate=   True
-      Bold            =   False
-      Enabled         =   True
-      FontName        =   "System"
-      FontSize        =   0.0
-      FontUnit        =   0
-      Height          =   20
-      Index           =   -2147483648
-      InitialValue    =   ""
-      Italic          =   False
-      Left            =   35
-      LockBottom      =   False
-      LockedInPosition=   False
-      LockLeft        =   True
-      LockRight       =   False
-      LockTop         =   True
-      Scope           =   0
-      SelectedRowIndex=   0
-      TabIndex        =   1
-      TabPanelIndex   =   0
-      TabStop         =   True
-      Tooltip         =   ""
-      Top             =   67
-      Transparent     =   False
-      Underline       =   False
-      Visible         =   True
-      Width           =   183
-   End
-   Begin DesktopLabel Label1
-      AllowAutoDeactivate=   True
-      Bold            =   False
-      Enabled         =   True
-      FontName        =   "System"
-      FontSize        =   0.0
-      FontUnit        =   0
-      Height          =   20
-      Index           =   -2147483648
-      Italic          =   False
-      Left            =   35
-      LockBottom      =   False
-      LockedInPosition=   False
-      LockLeft        =   True
-      LockRight       =   False
-      LockTop         =   True
-      Multiline       =   False
-      Scope           =   0
-      Selectable      =   False
-      TabIndex        =   2
-      TabPanelIndex   =   0
-      TabStop         =   True
-      Text            =   "Untitled"
-      TextAlignment   =   0
-      TextColor       =   &c000000
-      Tooltip         =   ""
-      Top             =   400
-      Transparent     =   False
-      Underline       =   False
-      Visible         =   True
-      Width           =   545
+      Width           =   560
+      Begin DesktopListBox ListBox2
+         AllowAutoDeactivate=   True
+         AllowAutoHideScrollbars=   True
+         AllowExpandableRows=   False
+         AllowFocusRing  =   True
+         AllowResizableColumns=   False
+         AllowRowDragging=   False
+         AllowRowReordering=   False
+         Bold            =   False
+         ColumnCount     =   1
+         ColumnWidths    =   ""
+         DefaultRowHeight=   -1
+         DropIndicatorVisible=   False
+         Enabled         =   True
+         FontName        =   "System"
+         FontSize        =   0.0
+         FontUnit        =   0
+         GridLineStyle   =   0
+         HasBorder       =   True
+         HasHeader       =   True
+         HasHorizontalScrollbar=   False
+         HasVerticalScrollbar=   True
+         HeadingIndex    =   -1
+         Height          =   218
+         Index           =   -2147483648
+         InitialParent   =   "TabPanel1"
+         InitialValue    =   ""
+         Italic          =   False
+         Left            =   40
+         LockBottom      =   True
+         LockedInPosition=   False
+         LockLeft        =   True
+         LockRight       =   True
+         LockTop         =   True
+         RequiresSelection=   False
+         RowSelectionType=   0
+         Scope           =   0
+         TabIndex        =   0
+         TabPanelIndex   =   1
+         TabStop         =   True
+         Tooltip         =   ""
+         Top             =   122
+         Transparent     =   False
+         Underline       =   False
+         Visible         =   True
+         Width           =   520
+         _ScrollWidth    =   -1
+      End
+      Begin DesktopLabel Label2
+         AllowAutoDeactivate=   True
+         Bold            =   False
+         Enabled         =   True
+         FontName        =   "System"
+         FontSize        =   0.0
+         FontUnit        =   0
+         Height          =   44
+         Index           =   -2147483648
+         InitialParent   =   "TabPanel1"
+         Italic          =   False
+         Left            =   40
+         LockBottom      =   False
+         LockedInPosition=   False
+         LockLeft        =   True
+         LockRight       =   False
+         LockTop         =   True
+         Multiline       =   True
+         Scope           =   0
+         Selectable      =   False
+         TabIndex        =   1
+         TabPanelIndex   =   1
+         TabStop         =   True
+         Text            =   "Extract cells from example workbook. Show guessed type, source value and formatted value"
+         TextAlignment   =   0
+         TextColor       =   &c000000
+         Tooltip         =   ""
+         Top             =   66
+         Transparent     =   False
+         Underline       =   False
+         Visible         =   True
+         Width           =   520
+      End
+      Begin ccWorkbook ccWorkbook1
+         AllowAutoDeactivate=   True
+         AllowFocus      =   False
+         AllowFocusRing  =   False
+         AllowTabs       =   True
+         Backdrop        =   0
+         BackgroundColor =   &cFFFFFF
+         Composited      =   False
+         Enabled         =   True
+         HasBackgroundColor=   False
+         Height          =   308
+         Index           =   -2147483648
+         InitialParent   =   "TabPanel1"
+         Left            =   25
+         LockBottom      =   True
+         LockedInPosition=   False
+         LockLeft        =   True
+         LockRight       =   True
+         LockTop         =   True
+         Scope           =   0
+         TabIndex        =   0
+         TabPanelIndex   =   2
+         TabStop         =   True
+         Tooltip         =   ""
+         Top             =   70
+         Transparent     =   True
+         Visible         =   True
+         Width           =   549
+      End
+      Begin ccWorkbook ccWorkbook2
+         AllowAutoDeactivate=   True
+         AllowFocus      =   False
+         AllowFocusRing  =   False
+         AllowTabs       =   True
+         Backdrop        =   0
+         BackgroundColor =   &cFFFFFF
+         Composited      =   False
+         Enabled         =   True
+         HasBackgroundColor=   False
+         Height          =   308
+         Index           =   -2147483648
+         InitialParent   =   "TabPanel1"
+         Left            =   25
+         LockBottom      =   True
+         LockedInPosition=   False
+         LockLeft        =   True
+         LockRight       =   True
+         LockTop         =   True
+         Scope           =   0
+         TabIndex        =   0
+         TabPanelIndex   =   3
+         TabStop         =   True
+         Tooltip         =   ""
+         Top             =   70
+         Transparent     =   True
+         Visible         =   True
+         Width           =   549
+      End
    End
 End
 #tag EndDesktopWindow
@@ -140,23 +201,25 @@ End
 	#tag Event
 		Sub Opening()
 		  
-		  var no as integer = 3
+		  // Extract sample data
+		  ExtractCellSamples
 		  
-		  select case no 
-		    
-		  case 0
-		    ProcessXLSXFileAuto( "test_file_1.xlsx")
-		    
-		  case 1
-		    ProcessXLSXFileOnDemand( "test_file_1.xlsx")
-		    
-		  case 2
-		    ProcessXLSXFileAuto( "test_file_2.xlsx")
-		    
-		  case 3
-		    ProcessXLSXFileOnDemand( "test_file_2.xlsx")
-		    
-		  end select
+		  var baseFld as FolderItem = findTestDataFolder
+		  
+		  var fld as FolderItem
+		  
+		  // Load a set of tabular sheets, use on-demand load
+		  fld = baseFld.Child("test_file_2.xlsx")
+		  if not fld.Exists then Return
+		  ccWorkbook1.UseWorkbook(new clWorkbook(fld , clWorkbook.LoadModes.LoadSheetOnDemand))
+		   
+		  
+		  
+		  // Load a form sheet
+		  fld = baseFld.Child("test_file_1.xlsx")
+		  if not fld.Exists then Return
+		  ccWorkbook2.UseWorkbook( new clWorkbook(fld ))
+		  
 		  
 		  return
 		End Sub
@@ -164,12 +227,13 @@ End
 
 
 	#tag Method, Flags = &h0
-		Sub ProcessXLSXFileAuto(filename as string)
+		Sub ExampleLoadAuto(filename as string)
 		  //
 		  // Example load workbook, 
 		  // - auto mode 
 		  // - use temporary folder as workarea
 		  //
+		  
 		  
 		  var fld as FolderItem = findTestDataFolder
 		  
@@ -177,16 +241,14 @@ End
 		  
 		  if not fld.Exists then Return
 		  
-		  self.loadedWorkbook = new clWorkbook(fld )
-		  
-		  self.UpdateUI
+		  var myworkbook as clWorkbook =  new clWorkbook(fld)
 		  
 		  return
 		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub ProcessXLSXFileOnDemand(filename as string)
+		Sub ExampleLoadOnDemand(filename as string)
 		  //
 		  // Example load workbook, 
 		  // - SheetOnDemand mode 
@@ -199,108 +261,112 @@ End
 		  
 		  if not fld.Exists then Return
 		  
-		  self.loadedWorkbook = new clWorkbook(fld _
+		  var myworkbook as clWorkbook = new clWorkbook(fld _
 		  , clWorkbook.LoadModes.LoadSheetOnDemand _
 		  , "" _
 		   , SpecialFolder.Desktop.child(filename.ReplaceAll(".","-") + " folder") _
 		  )
 		  
-		  self.UpdateUI
 		  
 		  return
 		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub ShowSheet(sheetname as string)
+		Sub ExtractCellSamples()
 		  
-		  var sheet as clWorksheet
+		  var filename as string = "test_file_2.xlsx"
 		  
-		End Sub
-	#tag EndMethod
-
-	#tag Method, Flags = &h0
-		Sub UpdateUI()
+		  var fld as FolderItem = findTestDataFolder
 		  
+		  fld = fld.Child(filename)
 		  
-		  popupmenu1.RemoveAllRows
+		  if not fld.Exists then Return
 		  
-		  var sheets() as string = self.loadedWorkbook.GetSheetNames
+		  var Workbook as new clWorkbook(fld )
 		  
-		  popupmenu1.AddAllRows(sheets)
-		  
-		  popupmenu1.SelectedRowIndex = 0
-		  
-		End Sub
-	#tag EndMethod
-
-
-	#tag Property, Flags = &h0
-		loadedWorkbook As clWorkbook
-	#tag EndProperty
-
-
-#tag EndWindowCode
-
-#tag Events ListBox1
-	#tag Event
-		Sub Opening()
-		  
-		End Sub
-	#tag EndEvent
-	#tag Event
-		Function CellPressed(row As Integer, column As Integer, x As Integer, y As Integer) As Boolean
-		  
-		  var tmp as string = me.CellTextAt(row, column)
-		  
-		  Label1.Text = tmp
+		  var worksheet as clWorksheet = Workbook.GetSheet("Sales Data")
 		  
 		  
-		End Function
-	#tag EndEvent
-#tag EndEvents
-#tag Events PopupMenu1
-	#tag Event
-		Sub SelectionChanged(item As DesktopMenuItem)
-		  Const colBase as string = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-		  var name as string = me.SelectedRowText
+		  var collectedCells() as clCell
 		  
-		  var sheet as clWorksheet = self.loadedWorkbook.GetSheet(name)
+		  collectedCells.Add(worksheet.GetCell("A3")) // String from shared string
 		  
-		  ListBox1.RemoveAllRows
-		  
-		  if sheet = nil then return
-		  
-		  listbox1.ColumnCount = sheet.lastColumn + 1
-		  
-		  listbox1.HeaderAt(0) = "#"
-		  
-		  for i as integer= 1 to sheet.lastColumn + 1
-		    listbox1.HeaderAt(i) = colBase.Middle(i-1,1)
+		  for i as integer = 3 to 8
+		    var cellLocation as string
+		    
+		    cellLocation = "C" + str(i)
+		    collectedCells.Add(worksheet.GetCell(cellLocation))
+		    
+		    cellLocation = "F" + str(i)
+		    cellLocation = "G" + str(i)
+		    collectedCells.Add(worksheet.GetCell(cellLocation))
 		    
 		  next
 		  
 		  
-		  for each row as clWorkrow in sheet.rows
-		    
-		    if row <> nil then
-		      Listbox1.AddRow str(row.row)
+		  listbox2.RemoveAllRows
+		  listbox2.ColumnCount = 5
+		  
+		  Listbox2.HeaderAt(0)="Location"
+		  Listbox2.HeaderAt(1)="Loaded value"
+		  Listbox2.HeaderAt(2)="Guessed type"
+		  Listbox2.HeaderAt(3)="Value"
+		  Listbox2.HeaderAt(4)="Formatted value"
+		  
+		  for each cell as clCell in collectedCells
+		    if cell <> nil then
+		      var cellLocation as string = cell.CellLocation
+		      var cellDisplayStr as string
+		      var cellType as string 
+		      var cellLoadedStr as string =cell.CellSourceValue
 		      
-		      for col as integer = 1 to sheet.lastColumn
-		        var rc as clCell = row.GetCell(col)
-		        var tmp as string 
-		        if rc <> nil then tmp = rc.GetValueAsString(self.loadedWorkbook)
+		      var cellFormattedStr as string = cell.GetValueAsString(workbook)
+		      
+		      select case cell.GuessType(workbook)
 		        
-		        Listbox1.CellTextAt(listbox1.LastAddedRowIndex, col) = tmp
+		      case clCell.GuessedType.General
+		        cellType = "General"
+		        cellDisplayStr = "" 
 		        
-		      next
+		      case clCell.GuessedType.Date
+		        cellType = "Date"
+		        cellDisplayStr = cell.GetValueAsDateTime(workbook).SQLDate 
+		        
+		      case clCell.GuessedType.Number
+		        cellType = "Number"
+		        cellDisplayStr =  format(cell.GetValueAsNumber(Workbook), "-#####0.000") 
+		        
+		      case  clCell.GuessedType.String
+		        cellType = "String"
+		        cellDisplayStr = ""
+		        
+		      end select
+		      
+		      
+		      Listbox2.AddRow(cellLocation)
+		      Listbox2.CellTextAt(Listbox2.LastAddedRowIndex,1 ) = cellLoadedStr
+		      Listbox2.CellTextAt(Listbox2.LastAddedRowIndex, 2) = cellType
+		      Listbox2.CellTextAt(Listbox2.LastAddedRowIndex, 3) = cellDisplayStr
+		      Listbox2.CellTextAt(Listbox2.LastAddedRowIndex, 4) = cellFormattedStr
 		      
 		    end if
 		    
 		  next
+		  
+		  var k as integer = 1
+		  
+		  
+		  
+		  
+		  
+		  
 		End Sub
-	#tag EndEvent
-#tag EndEvents
+	#tag EndMethod
+
+
+#tag EndWindowCode
+
 #tag ViewBehavior
 	#tag ViewProperty
 		Name="Name"

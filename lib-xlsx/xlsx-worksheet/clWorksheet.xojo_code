@@ -21,13 +21,15 @@ Protected Class clWorksheet
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub Constructor(WorkFolder as folderItem, SheetName as string, SheetFilePath as string)
+		Sub Constructor(WorkFolder as folderItem, SheetName as string, SheetFilePath as string, TraceLoad as Boolean)
 		  
 		  self.Name = SheetName
 		  
 		  self.FilePath = SheetFilePath.Split("/")
 		  
 		  self.SourceFolder = WorkFolder
+		  
+		  Self.Trace = TraceLoad
 		  
 		  self.LoadWorksheetInfo
 		  
@@ -45,6 +47,18 @@ Protected Class clWorksheet
 		End Function
 	#tag EndMethod
 
+	#tag Method, Flags = &h0
+		Function GetCell(A1Ref as string) As clCell
+		  var p as pair
+		  
+		  p = clCell.ExtractLocation(A1Ref)
+		  
+		  return self.GetCell(p.left, p.right)
+		  
+		  
+		End Function
+	#tag EndMethod
+
 	#tag Method, Flags = &h1
 		Protected Sub LoadSheetData(basenode as XMLNode)
 		  
@@ -52,7 +66,7 @@ Protected Class clWorksheet
 		  var lvl as integer = 0
 		  
 		  while x1 <> nil 
-		    clWorkbook.WriteLog(CurrentMethodName ,lvl, x1.name)
+		    if self.Trace then clWorkbook.WriteLog(CurrentMethodName ,lvl, x1.name)
 		    
 		    if x1.name = "row" then self.LoadSheetDataRow(x1)
 		    
@@ -82,7 +96,7 @@ Protected Class clWorksheet
 		  var lvl as integer = 0
 		  
 		  while x1 <> nil 
-		    clWorkbook.WriteLog(CurrentMethodName ,lvl, x1.name)
+		    if self.trace then  clWorkbook.WriteLog(CurrentMethodName ,lvl, x1.name)
 		    
 		    if x1.name = cRichText and x1.FirstChild <> nil then mycell.SetValueFromString(x1.FirstChild.Value)
 		    if x1.name = cCellValue and x1.FirstChild <> nil then mycell.SetValueFromString(x1.FirstChild.Value)
@@ -107,7 +121,7 @@ Protected Class clWorksheet
 		  var lvl as integer = 0
 		  
 		  while x1 <> nil 
-		    clWorkbook.WriteLog(CurrentMethodName ,lvl, x1.name)
+		    if self.trace then clWorkbook.WriteLog(CurrentMethodName ,lvl, x1.name)
 		    
 		    if x1.name = "c" then self.LoadSheetDataCell(x1)
 		    
@@ -141,9 +155,9 @@ Protected Class clWorksheet
 		  var lvl as integer = 0
 		  
 		  while x1 <> nil 
-		    clWorkbook.WriteLog(CurrentMethodName ,lvl, x1.name)
+		    if self.Trace then  clWorkbook.WriteLog(CurrentMethodName ,lvl, x1.name)
 		    
-		    if x1.name = "dimension" then System.DebugLog("REF:"+x1.GetAttribute("ref"))
+		    if x1.name = "dimension"and self.Trace  then System.DebugLog("Dimension REF:"+x1.GetAttribute("ref"))
 		    if x1.name = "sheetData" then LoadSheetData(x1)
 		    
 		    if x1.name = "worksheet" then
@@ -178,6 +192,10 @@ Protected Class clWorksheet
 
 	#tag Property, Flags = &h0
 		SourceFolder As FolderItem
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
+		Trace As Boolean
 	#tag EndProperty
 
 

@@ -1,22 +1,6 @@
 #tag Class
 Protected Class clCell
 	#tag Method, Flags = &h0
-		Shared Function CalculateAddress(row as integer, column as integer) As String
-		  Const colBase as string = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-		  
-		  var location as string 
-		  
-		  if column < 26 then
-		    location = colBase.mid(column+1, 1) + str(row+1)
-		    
-		  end if
-		  
-		  return location
-		  
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h0
 		Sub Constructor(baseNode as XMLNode)
 		  
 		  // Handle cell attributes
@@ -95,6 +79,83 @@ Protected Class clCell
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Function GetValueAsDateTime(wb as clWorkbook) As DateTime
+		   
+		  //
+		  // Return nil if the cell has no value
+		  //
+		  if self.CellSourceValue.trim.Length = 0 then return nil
+		  
+		  //
+		  // Return nil if string or shared string 
+		  //
+		  select case self.CellType
+		    
+		  case  TypeSharedString  
+		    return nil
+		    
+		  case TypeFormulaString, TypeInlineString
+		    return nil
+		    
+		  end select
+		  
+		  //
+		  // Could be date or number
+		  //
+		  if self.CellStyle > 0 then
+		    var style as clCellXf = wb.GetCellStyle(self.CellStyle)
+		    
+		    var fmt as clCellFormatter = wb.GetFormat(style.NumberFormatId)
+		    
+		    if fmt <> nil and  fmt.IsDateFormat then
+		      return fmt.MakeDate(self.CellValue)
+		      
+		    end if
+		    
+		  end if
+		  
+		  
+		  return  nil
+		  
+		  
+		  
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function GetValueAsNumber(wb as clWorkbook) As double
+		   
+		  //
+		  // Return empty string is the loaded cell value is empty
+		  //
+		  if self.CellSourceValue.trim.Length = 0 then return 0
+		  //
+		  // String or shared string ?
+		  //
+		  select case self.CellType
+		    
+		  case  TypeSharedString  
+		    return 0
+		    
+		  case TypeFormulaString, TypeInlineString
+		    return  0
+		    
+		  end select
+		  
+		  //
+		  // Could be date or number
+		  //
+		  return self.CellValue
+		  
+		  
+		  
+		  
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Function GetValueAsString(wb as clWorkbook) As String
 		  
 		  const CDefaultNumberFormat = "-#####0.00##"
@@ -146,6 +207,57 @@ Protected Class clCell
 		  
 		  
 		  return format(self.CellValue, CDefaultNumberFormat)
+		  
+		  
+		  
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function GuessType(wb as clWorkbook) As GuessedType
+		   
+		  //
+		  // Return general type if the loaded cell value is empty
+		  //
+		  if self.CellSourceValue.trim.Length = 0 then return GuessedType.General
+		  
+		  //
+		  // String or shared string ?
+		  //
+		  select case self.CellType
+		    
+		  case  TypeSharedString  
+		    return GuessedType.String
+		    
+		  case TypeFormulaString, TypeInlineString
+		    return GuessedType.String
+		    
+		  end select
+		  
+		  //
+		  // Could be date or number
+		  //
+		  if self.CellStyle > 0 then
+		    var style as clCellXf = wb.GetCellStyle(self.CellStyle)
+		    
+		    var fmt as clCellFormatter = wb.GetFormat(style.NumberFormatId)
+		    
+		    if fmt = nil then return GuessedType.General
+		     
+		    
+		    if fmt.IsDateFormat then
+		      return GuessedType.Date
+		      
+		    else
+		      return GuessedType.Number
+		       
+		      
+		      
+		    end if
+		  end if
+		   
+		  return GuessedType.General
 		  
 		  
 		  
@@ -282,6 +394,14 @@ Protected Class clCell
 
 	#tag Constant, Name = TypeSharedString, Type = String, Dynamic = False, Default = \"s", Scope = Public
 	#tag EndConstant
+
+
+	#tag Enum, Name = GuessedType, Type = Integer, Flags = &h0
+		General
+		  String
+		  Date
+		Number
+	#tag EndEnum
 
 
 	#tag ViewBehavior

@@ -1,7 +1,7 @@
 #tag Class
 Protected Class clWorkSheetRef
 	#tag Method, Flags = &h0
-		Sub Constructor(SourceFolder as folderitem, SheetName as string, SheetId as integer, SheetRelationId as string, SheetRelationTarget as string)
+		Sub Constructor(SourceFolder as folderitem, SheetName as string, SheetId as integer, SheetRelationId as string, SheetRelationTarget as string, TraceFlag as Boolean)
 		  
 		  self.TempFolder = SourceFolder
 		  self.name = SheetName
@@ -9,6 +9,15 @@ Protected Class clWorkSheetRef
 		  self.RelationId = SheetRelationId
 		  self.RelationTarget = SheetRelationTarget
 		  self.SheetData = nil
+		  self.Trace = TraceFlag
+		  
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub DropData()
+		  
+		  SheetData = nil
 		  
 		End Sub
 	#tag EndMethod
@@ -37,7 +46,7 @@ Protected Class clWorkSheetRef
 		Sub LoadSheetData()
 		  
 		  
-		  self.SheetData = new clWorksheet(TempFolder, Name, RelationTarget)
+		  self.SheetData = new clWorksheet(TempFolder, Name, RelationTarget, self.Trace)
 		  
 		  return 
 		End Sub
@@ -66,6 +75,10 @@ Protected Class clWorkSheetRef
 
 	#tag Property, Flags = &h1
 		Protected TempFolder As FolderItem
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
+		Trace As Boolean
 	#tag EndProperty
 
 

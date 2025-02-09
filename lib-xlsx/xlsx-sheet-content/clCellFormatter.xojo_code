@@ -149,17 +149,34 @@ Protected Class clCellFormatter
 		Function FormatValue(SourceValue as variant) As string
 		  
 		  if self.IsDateFormat then
-		    var dateOffset as integer = SourceValue
-		    var d as new DateTime(new Date(1900,1,1))
 		    
-		    d = d.AddInterval(0,0, dateOffset-2)
-		    
+		    var d as DateTime = MakeDate(SourceValue)
+		    // 
+		    // var dateOffset as integer = SourceValue
+		    // var d as new DateTime(new Date(1900,1,1))
+		    // 
+		    // d = d.AddInterval(0,0, dateOffset-2)
+		    // 
 		    return self.FormatAsDate(d)
 		  else
 		    var d as Double = SourceValue
 		    return self.FormatAsNumber(d)
 		    
 		  end if
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function MakeDate(SourceValue as variant) As DateTime
+		  
+		  
+		  var dateOffset as integer = SourceValue
+		  var d as new DateTime(new Date(1900,1,1))
+		  
+		  d = d.AddInterval(0,0, dateOffset-2)
+		  
+		  return d
 		  
 		End Function
 	#tag EndMethod

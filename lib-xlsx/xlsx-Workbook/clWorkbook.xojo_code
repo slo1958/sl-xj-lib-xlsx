@@ -22,7 +22,10 @@ Protected Class clWorkbook
 		  
 		  self.InCellLineBreak = " "
 		  
-		  self.TraceLoadSharedStrings = True
+		  self.TraceLoadSharedStrings = False
+		  self.TraceLoadStyles = False
+		  self.TraceLoadSheetData = False
+		  self.TraceLoadWorkbook = False
 		  
 		  self.SourceFile = file
 		  self.TempFolder = workfolder
@@ -32,6 +35,35 @@ Protected Class clWorkbook
 		  if LoadMode = LoadModes.Manual then return
 		  
 		  self.load(LoadMode)
+		  
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub DropSheetFromMemory(sheetName as string)
+		  
+		  //
+		  // Find an entry in the table of worksheetref  based on sheet name
+		  //
+		  // Parameters:
+		  // - sheet name
+		  //
+		  // Returns:
+		  //  clWorksheet object or nil
+		  //
+		  
+		  
+		  var SheetRef as clWorkSheetRef
+		  
+		  for each sheet as clWorkSheetRef in self.SheetRefs
+		    if sheet.Name = sheetName then SheetRef = sheet
+		    
+		  next
+		  
+		  if SheetRef = nil then return
+		  
+		  SheetRef.DropData
+		  
 		  
 		End Sub
 	#tag EndMethod
@@ -124,7 +156,7 @@ Protected Class clWorkbook
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function GetSheet(name as string) As clWorksheet
+		Function GetSheet(sheetName as string) As clWorksheet
 		  
 		  //
 		  // Find an entry in the table of worksheetref  based on sheet name
@@ -140,7 +172,7 @@ Protected Class clWorkbook
 		  var SheetRef as clWorkSheetRef
 		  
 		  for each sheet as clWorkSheetRef in self.SheetRefs
-		    if sheet.Name = name then SheetRef = sheet
+		    if sheet.Name = sheetName then SheetRef = sheet
 		    
 		  next
 		  
@@ -433,7 +465,7 @@ Protected Class clWorkbook
 		  var x1 as xmlnode = basenode.FirstChild
 		  
 		  while x1 <> nil 
-		    clWorkbook.WriteLog(CurrentMethodName,-1, x1.name)
+		    if self.TraceLoadStyles then clWorkbook.WriteLog(CurrentMethodName,-1, x1.name)
 		    
 		    if x1.name = "numFmt" then
 		      var formatcCode as string = x1.GetAttribute("formatCode")
@@ -470,7 +502,7 @@ Protected Class clWorkbook
 		  
 		  
 		  while x1 <> nil 
-		    clWorkbook.Writelog(CurrentMethodName, lvl1, x1.name)
+		    if self.TraceLoadStyles then clWorkbook.Writelog(CurrentMethodName, lvl1, x1.name)
 		    
 		    if x1.name = "styleSheet" then x1 = x1.FirstChild
 		    
@@ -494,7 +526,7 @@ Protected Class clWorkbook
 		      self.LoadStyleNumFmts(x1)
 		      
 		    else
-		      System.DebugLog(CurrentMethodName+":" + x1.name)
+		      if self.TraceLoadStyles then clWorkbook.Writelog(CurrentMethodName, lvl1, x1.name)
 		      
 		    end if
 		    
@@ -558,14 +590,14 @@ Protected Class clWorkbook
 		  var lvl1 as integer = 0
 		  
 		  while x1 <> nil 
-		    clWorkbook.WriteLog(CurrentMethodName ,lvl1, x1.name)
+		    if self.TraceLoadWorkbook then  clWorkbook.WriteLog(CurrentMethodName ,lvl1, x1.name)
 		    
 		    if x1.name = "sheet" then
 		      var name as string = x1.GetAttribute("name")
 		      var sheetid as string = x1.GetAttribute("sheetId")
 		      var RelationId as String = x1.GetAttribute("r:id")
 		      var RelationTarget as string = self.FindRelation(RelationId).Target
-		      self.SheetRefs.add(new clWorkSheetRef(self.TempFolder, name, SheetId.ToInteger, RelationId, RelationTarget))
+		      self.SheetRefs.add(new clWorkSheetRef(self.TempFolder, name, SheetId.ToInteger, RelationId, RelationTarget, self.TraceLoadSheetData))
 		      
 		      if LoadMode =LoadModes.FullLoad then
 		        Self.SheetRefs(self.SheetRefs.LastIndex).LoadSheetData()
@@ -612,7 +644,7 @@ Protected Class clWorkbook
 		  var strCounter as integer = 0
 		  
 		  while x2 <> nil 
-		    clWorkbook.WriteLog(CurrentMethodName ,lvl2, x2.name)
+		    if self.TraceLoadWorkbook then clWorkbook.WriteLog(CurrentMethodName ,lvl2, x2.name)
 		    
 		    if x2.name = "Relationship" then 
 		      var relId as string = x2.GetAttribute("Id")
@@ -691,16 +723,7 @@ Protected Class clWorkbook
 
 	#tag Method, Flags = &h0
 		Shared Sub Writelog(Source as string, level as integer, message as string)
-		  var ignored() as string
 		  
-		  ignored.add("clWorksheet.")
-		  ignored.add("clWorkbook.LoadSharedString")
-		  ignored.add("clWorkbook.LoadWorkbookInfo")
-		  
-		  for each ignore as string in ignored
-		    if source.IndexOf(ignore) >=0 then return
-		    
-		  next
 		  
 		  System.DebugLog(source+", " + "level " + str(level)+ ": " + message)
 		End Sub
@@ -819,6 +842,18 @@ Protected Class clWorkbook
 
 	#tag Property, Flags = &h0
 		TraceLoadSharedStrings As Boolean
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
+		TraceLoadSheetData As Boolean
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
+		TraceLoadStyles As Boolean
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
+		TraceLoadWorkbook As Boolean
 	#tag EndProperty
 
 
