@@ -143,3 +143,12 @@ More test cases must be included.
 ## Write XLSX files
 In dev
 
+
+## Adding the library to your project
+
+- open the project test-lib-xlsx
+- locate the folder ‘lib-xlsx’
+- copy the folder
+- paste in your project
+- Xojo may expand the folder after pasting, you can collapse it
+- If you want to display the content of data table in a form, for example for debugging purposes, repeat this operation for the folder ‘lib-xlsx-ui-support’
