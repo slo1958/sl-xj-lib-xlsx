@@ -271,11 +271,11 @@ End
 		  
 		  if sheet = nil then return
 		  
-		  listbox1.ColumnCount = sheet.lastColumn + 2
+		  listbox1.ColumnCount = sheet.lastColumn + 1
 		  
 		  listbox1.HeaderAt(0) = "#"
 		  
-		  for i as integer= 1 to sheet.lastColumn + 2
+		  for i as integer= 1 to sheet.lastColumn + 1
 		    listbox1.HeaderAt(i) = colBase.Middle(i-1,1)
 		    
 		  next
