@@ -1,48 +1,6 @@
 #tag Class
 Protected Class App
 Inherits DesktopApplication
-	#tag Event
-		Sub Opening()
-		  
-		  
-		  var columns() as integer = array(10,32,260)
-		  var row as integer = 21
-		  
-		  
-		  Const colBase as string = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-		  
-		  
-		  for each column as integer in columns
-		    var location as string 
-		    
-		    var lastColumn as integer
-		    
-		    if column > 26*26 then
-		      
-		    elseif column > 26 then
-		      var top as integer = column \ 26
-		      
-		      location = colBase.mid(top+1, 1)
-		      
-		      lastColumn = column - (26*top)
-		    else
-		      lastColumn = column
-		      
-		    end if
-		    location = colBase.mid(lastColumn+1, 1)
-		     
-		    location = location + str(row)
-		    
-		    System.DebugLog( str(column) + ":" + location)
-		    
-		  next
-		  
-		  return 
-		  
-		End Sub
-	#tag EndEvent
-
-
 	#tag Constant, Name = kEditClear, Type = String, Dynamic = False, Default = \"&Delete", Scope = Public
 		#Tag Instance, Platform = Windows, Language = Default, Definition  = \"&Delete"
 		#Tag Instance, Platform = Linux, Language = Default, Definition  = \"&Delete"

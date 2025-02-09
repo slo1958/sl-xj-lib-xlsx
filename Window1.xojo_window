@@ -289,16 +289,28 @@ End
 		  
 		  
 		  var collectedCells() as clCell
-		  
-		  collectedCells.Add(worksheet.GetCell("A3")) // String from shared string
-		  
+		   
 		  for i as integer = 3 to 8
 		    var cellLocation as string
+		    
+		    cellLocation = "A" + str(i)
+		    collectedCells.Add(worksheet.GetCell(cellLocation))
+		    
+		    cellLocation = "B" + str(i)
+		    collectedCells.Add(worksheet.GetCell(cellLocation))
 		    
 		    cellLocation = "C" + str(i)
 		    collectedCells.Add(worksheet.GetCell(cellLocation))
 		    
+		    cellLocation = "D" + str(i)
+		    collectedCells.Add(worksheet.GetCell(cellLocation))
+		    
+		    cellLocation = "E" + str(i)
+		    collectedCells.Add(worksheet.GetCell(cellLocation))
+		    
 		    cellLocation = "F" + str(i)
+		    collectedCells.Add(worksheet.GetCell(cellLocation))
+		    
 		    cellLocation = "G" + str(i)
 		    collectedCells.Add(worksheet.GetCell(cellLocation))
 		    
