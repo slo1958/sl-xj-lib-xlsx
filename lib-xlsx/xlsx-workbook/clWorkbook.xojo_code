@@ -26,6 +26,7 @@ Protected Class clWorkbook
 		  self.TraceLoadStyles = False
 		  self.TraceLoadSheetData = False
 		  self.TraceLoadWorkbook = False
+		  self.TraceShowUnzippedWorkbool = True
 		  
 		  self.SourceFile = file
 		  self.TempFolder = workfolder
@@ -358,6 +359,32 @@ Protected Class clWorkbook
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
+		Protected Sub LoadDefinedNames(LoadMode as LoadModes, XmlSheets as XMLNode, XmlLevel as integer)
+		  
+		  var x1 as xmlnode = XmlSheets
+		  var lvl1 as integer = XmlLevel
+		  
+		  while x1 <> nil 
+		    if self.TraceLoadWorkbook then  clWorkbook.WriteLog(CurrentMethodName ,lvl1, x1.name)
+		    
+		    if x1.name = "definedName" then
+		      var name as string = x1.GetAttribute("name")
+		      var range as string = x1.FirstChild.Value
+		      var kLimits as variant = x1.GetAttribute("localSheetId")
+		      
+		      NamedRanges.Add(new clWorkbookNamedRange(name, range, kLimits))
+		      
+		    end if
+		    
+		    x1 = x1.NextSibling
+		    
+		  wend
+		  
+		  return
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
 		Protected Sub LoadSharedStrings()
 		  
 		  self.SharedStrings = new Dictionary
@@ -583,7 +610,62 @@ Protected Class clWorkbook
 		  if WorkbookXML = nil then 
 		    self.Writelog(CurrentMethodName,-1,"Cannot find <workbook.xml>")
 		    return
-		     
+		    
+		  end if
+		  
+		  var x1 as xmlnode = WorkbookXML.FirstChild
+		  var lvl1 as integer = 0
+		  
+		  while x1 <> nil 
+		    if self.TraceLoadWorkbook then  clWorkbook.WriteLog(CurrentMethodName ,lvl1, x1.name)
+		    
+		    
+		    // Navigate the tree
+		    if x1.name ="workbook" then 
+		      x1 = x1.FirstChild
+		      lvl1 = lvl1+1
+		      
+		    elseif x1.name = "sheets" then
+		      LoadWorksheetsList(LoadMode, x1.FirstChild, lvl1+1)
+		      x1 = x1.NextSibling
+		      
+		    elseif x1.name = "definedNames" then
+		      LoadDefinedNames(LoadMode, x1.FirstChild, lvl1+1)
+		      x1 = x1.NextSibling
+		      
+		    else
+		      x1 = x1.NextSibling
+		      
+		    end if
+		  wend
+		  
+		  
+		  
+		  
+		  return
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
+		Protected Sub LoadWorkbookInfo_old(LoadMode as LoadModes)
+		  //
+		  // load information from workbook.xml
+		  // - Sheet references
+		  //   Sheet data are loaded is load mode is not SheetOnDemand
+		  //
+		  // Parameters:
+		  // - loadmode 
+		  //
+		  // Returns
+		  // (nothing)
+		  //
+		  
+		  var WorkbookXML as XMLDocument = self.OpenDocument(self.TempFolder, "xl","workbook.xml")
+		  
+		  if WorkbookXML = nil then 
+		    self.Writelog(CurrentMethodName,-1,"Cannot find <workbook.xml>")
+		    return
+		    
 		  end if
 		  
 		  var x1 as xmlnode = WorkbookXML.FirstChild
@@ -621,6 +703,8 @@ Protected Class clWorkbook
 		    end if
 		    
 		  wend
+		  
+		  
 		  
 		  return
 		End Sub
@@ -670,6 +754,36 @@ Protected Class clWorkbook
 		End Sub
 	#tag EndMethod
 
+	#tag Method, Flags = &h1
+		Protected Sub LoadWorksheetsList(LoadMode as LoadModes, XmlSheets as XMLNode, XmlLevel as integer)
+		  
+		  var x1 as xmlnode = XmlSheets
+		  var lvl1 as integer = XmlLevel
+		  
+		  while x1 <> nil 
+		    if self.TraceLoadWorkbook then  clWorkbook.WriteLog(CurrentMethodName ,lvl1, x1.name)
+		    
+		    if x1.name = "sheet" then
+		      var name as string = x1.GetAttribute("name")
+		      var sheetid as string = x1.GetAttribute("sheetId")
+		      var RelationId as String = x1.GetAttribute("r:id")
+		      var RelationTarget as string = self.FindRelation(RelationId).Target
+		      self.SheetRefs.add(new clWorkSheetRef(self.TempFolder, name, SheetId.ToInteger, RelationId, RelationTarget, self.TraceLoadSheetData))
+		      
+		      if LoadMode =LoadModes.FullLoad then
+		        Self.SheetRefs(self.SheetRefs.LastIndex).LoadSheetData()
+		        
+		      end if
+		      
+		    end if
+		    
+		    x1 = x1.NextSibling
+		    
+		  wend
+		  
+		End Sub
+	#tag EndMethod
+
 	#tag Method, Flags = &h0
 		Shared Function OpenDocument(BaseFolder as FolderItem, paramarray levels as string) As XMLDocument
 		  
@@ -699,7 +813,6 @@ Protected Class clWorkbook
 		    
 		    self.TempFolder  =  SpecialFolder.Temporary
 		    
-		    
 		    // prepare work area
 		    
 		    self.TempFolder = self.TempFolder.Child(file.name.ReplaceAll(".","-") + " folder")  
@@ -715,6 +828,11 @@ Protected Class clWorkbook
 		  if not self.TempFolder.Exists then self.TempFolder.CreateFolder
 		  
 		  file.Unzip(self.TempFolder )
+		  
+		  if TraceShowUnzippedWorkbool then 
+		    self.TempFolder.Open
+		    
+		  end if
 		  
 		  return 0
 		  
@@ -813,6 +931,10 @@ Protected Class clWorkbook
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
+		NamedRanges() As clWorkbookNamedRange
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
 		NumberingFormat As Dictionary
 	#tag EndProperty
 
@@ -854,6 +976,10 @@ Protected Class clWorkbook
 
 	#tag Property, Flags = &h0
 		TraceLoadWorkbook As Boolean
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
+		TraceShowUnzippedWorkbool As Boolean
 	#tag EndProperty
 
 
@@ -928,6 +1054,38 @@ Protected Class clWorkbook
 			InitialValue=""
 			Type="string"
 			EditorType="MultiLineEditor"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="TraceLoadSharedStrings"
+			Visible=false
+			Group="Behavior"
+			InitialValue=""
+			Type="Boolean"
+			EditorType=""
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="TraceLoadSheetData"
+			Visible=false
+			Group="Behavior"
+			InitialValue=""
+			Type="Boolean"
+			EditorType=""
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="TraceLoadStyles"
+			Visible=false
+			Group="Behavior"
+			InitialValue=""
+			Type="Boolean"
+			EditorType=""
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="TraceLoadWorkbook"
+			Visible=false
+			Group="Behavior"
+			InitialValue=""
+			Type="Boolean"
+			EditorType=""
 		#tag EndViewProperty
 	#tag EndViewBehavior
 End Class

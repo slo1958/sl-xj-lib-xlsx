@@ -10,6 +10,7 @@ Begin DesktopWindow Window1
    HasFullScreenButton=   False
    HasMaximizeButton=   True
    HasMinimizeButton=   True
+   HasTitleBar     =   True
    Height          =   446
    ImplicitInstance=   True
    MacProcID       =   0
@@ -51,7 +52,7 @@ Begin DesktopWindow Window1
       Top             =   20
       Transparent     =   False
       Underline       =   False
-      Value           =   1
+      Value           =   0
       Visible         =   True
       Width           =   560
       Begin DesktopListBox ListBox2
@@ -100,6 +101,7 @@ Begin DesktopWindow Window1
          Underline       =   False
          Visible         =   True
          Width           =   520
+         _ScrollOffset   =   0
          _ScrollWidth    =   -1
       End
       Begin DesktopLabel Label2
@@ -212,7 +214,7 @@ End
 		  fld = baseFld.Child("test_file_2.xlsx")
 		  if not fld.Exists then Return
 		  ccWorkbook1.UseWorkbook(new clWorkbook(fld , clWorkbook.LoadModes.LoadSheetOnDemand))
-		   
+		  
 		  
 		  
 		  // Load a form sheet
@@ -264,7 +266,7 @@ End
 		  var myworkbook as clWorkbook = new clWorkbook(fld _
 		  , clWorkbook.LoadModes.LoadSheetOnDemand _
 		  , "" _
-		   , SpecialFolder.Desktop.child(filename.ReplaceAll(".","-") + " folder") _
+		  , SpecialFolder.Desktop.child(filename.ReplaceAll(".","-") + " folder") _
 		  )
 		  
 		  
@@ -289,7 +291,7 @@ End
 		  
 		  
 		  var collectedCells() as clCell
-		   
+		  
 		  for i as integer = 3 to 8
 		    var cellLocation as string
 		    
@@ -380,6 +382,14 @@ End
 #tag EndWindowCode
 
 #tag ViewBehavior
+	#tag ViewProperty
+		Name="HasTitleBar"
+		Visible=true
+		Group="Frame"
+		InitialValue="True"
+		Type="Boolean"
+		EditorType=""
+	#tag EndViewProperty
 	#tag ViewProperty
 		Name="Name"
 		Visible=true
