@@ -19,7 +19,7 @@ Protected Module UI_Support_Methods
 		  Const colBase as string = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 		  
 		  
-		  var sheet as clWorksheet =  Workbook.GetSheet(SheetName)
+		  var sheet as clWorksheet =  Workbook.GetSheetFromName(SheetName)
 		  
 		  targetListbox.RemoveAllRows
 		  

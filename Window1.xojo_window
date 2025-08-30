@@ -209,18 +209,27 @@ End
 		  var baseFld as FolderItem = findTestDataFolder
 		  
 		  var fld as FolderItem
+		  var debugOptions as  clXLSX_Debugging
 		  
 		  // Load a set of tabular sheets, use on-demand load
 		  fld = baseFld.Child("test_file_2.xlsx")
 		  if not fld.Exists then Return
-		  ccWorkbook1.UseWorkbook(new clWorkbook(fld , clWorkbook.LoadModes.LoadSheetOnDemand))
+		  
+		  debugOptions = new clXLSX_Debugging
+		  debugOptions.All_Off()
+		  
+		  ccWorkbook1.UseWorkbook(new clWorkbook(fld , debugOptions, clWorkbook.LoadModes.LoadSheetOnDemand))
 		  
 		  
 		  
 		  // Load a form sheet
 		  fld = baseFld.Child("test_file_1.xlsx")
 		  if not fld.Exists then Return
-		  ccWorkbook2.UseWorkbook( new clWorkbook(fld ))
+		  
+		  debugOptions = new clXLSX_Debugging
+		  debugOptions.All_On(False)
+		  
+		  ccWorkbook2.UseWorkbook( new clWorkbook(fld, debugOptions ))
 		  
 		  
 		  return
@@ -287,8 +296,9 @@ End
 		  
 		  var Workbook as new clWorkbook(fld )
 		  
-		  var worksheet as clWorksheet = Workbook.GetSheet("Sales Data")
+		  var worksheet as clWorksheet = Workbook.GetSheetFromName("Sales Data 1")
 		  
+		  if worksheet = nil then return
 		  
 		  var collectedCells() as clCell
 		  

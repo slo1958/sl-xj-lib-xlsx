@@ -1,6 +1,42 @@
 #tag Class
 Protected Class clWorkbook
 	#tag Method, Flags = &h0
+		Sub Constructor(file as FolderItem, DebugOptions as clXLSX_Debugging, LoadMode as LoadModes = LoadModes.FullLoad, language as string = "", workfolder as FolderItem = nil)
+		  //
+		  // Initialize and  load information about the workbook
+		  // - Relations
+		  // - shared strings (assuming fixed path and file name, should take from relations)
+		  // - Styles (assuming fixed path and file name, should take from relations)
+		  // - Sheet references
+		  //   Sheet data are loaded is load mode is not SheetOnDemand
+		  //
+		  // Parameters:
+		  // - source file (expected to be a .xlsx file)
+		  // - debug options
+		  // - loadmode 
+		  // - language info (not used)
+		  // - path to workfolder (or nil)
+		  //
+		  // Returns
+		  // (nothing)
+		  //
+		  
+		  self.InCellLineBreak = " "
+		  
+		  self.DebuggingSettings = DebugOptions
+		  self.SourceFile = file
+		  self.TempFolder = workfolder
+		  
+		  self.InitInternals(language)
+		  
+		  if LoadMode = LoadModes.Manual then return
+		  
+		  self.load(LoadMode)
+		  
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Sub Constructor(file as FolderItem, LoadMode as LoadModes = LoadModes.FullLoad, language as string = "", workfolder as FolderItem = nil)
 		  //
 		  // Initialize and  load information about the workbook
@@ -22,11 +58,7 @@ Protected Class clWorkbook
 		  
 		  self.InCellLineBreak = " "
 		  
-		  self.TraceLoadSharedStrings = False
-		  self.TraceLoadStyles = False
-		  self.TraceLoadSheetData = False
-		  self.TraceLoadWorkbook = False
-		  self.TraceShowUnzippedWorkbool = True
+		  self.DebuggingSettings = new clXLSX_Debugging
 		  
 		  self.SourceFile = file
 		  self.TempFolder = workfolder
@@ -157,7 +189,50 @@ Protected Class clWorkbook
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function GetSheet(sheetName as string) As clWorksheet
+		Function GetSheetFromID(sheetID as integer) As clWorksheet
+		  
+		  //
+		  // Find an entry in the table of worksheetref  based on sheet name
+		  //
+		  // Parameters:
+		  // - sheet ID
+		  //
+		  // Returns:
+		  //  clWorksheet object or nil
+		  //
+		  
+		  
+		  var SheetRef as clWorkSheetRef
+		  
+		  for each sheet as clWorkSheetRef in self.SheetRefs
+		    if sheet.Id = sheetID then SheetRef = sheet
+		    
+		  next
+		  
+		  if SheetRef = nil then return nil
+		  
+		  return SheetRef.GetSheetData
+		  
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function GetSheetFromLocalID(localID as integer) As clWorksheet
+		  
+		  if localID < 0 then Return nil
+		  
+		  if localID > self.SheetRefs.LastIndex then return nil
+		  
+		  var tmp as clWorkSheetRef = self.SheetRefs(localID)
+		  
+		  return tmp.GetSheetData
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function GetSheetFromName(sheetName as string) As clWorksheet
 		  
 		  //
 		  // Find an entry in the table of worksheetref  based on sheet name
@@ -370,9 +445,16 @@ Protected Class clWorkbook
 		    if x1.name = "definedName" then
 		      var name as string = x1.GetAttribute("name")
 		      var range as string = x1.FirstChild.Value
-		      var kLimits as variant = x1.GetAttribute("localSheetId")
+		      var localID as string = x1.GetAttribute("localSheetId")
 		      
-		      NamedRanges.Add(new clWorkbookNamedRange(name, range, kLimits))
+		      NamedRanges.Add(new clWorkbookNamedRange(name, range, localID.ToInteger))
+		      
+		      
+		      if self.TraceLoadNamedRanges then
+		        Writelog(CurrentMethodName,0, "Loaded name range [" + name  + "] , loaclId " + localID + ", definition [" + range + "].")
+		        
+		      end if
+		      
 		      
 		    end if
 		    
@@ -381,6 +463,41 @@ Protected Class clWorkbook
 		  wend
 		  
 		  return
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
+		Protected Sub LoadListWorksheets(LoadMode as LoadModes, XmlSheets as XMLNode, XmlLevel as integer)
+		  
+		  var x1 as xmlnode = XmlSheets
+		  var lvl1 as integer = XmlLevel
+		  
+		  while x1 <> nil 
+		    if self.TraceLoadWorkbook then  clWorkbook.WriteLog(CurrentMethodName ,lvl1, x1.name)
+		    
+		    if x1.name = "sheet" then
+		      var name as string = x1.GetAttribute("name")
+		      var sheetid as string = x1.GetAttribute("sheetId")
+		      var RelationId as String = x1.GetAttribute("r:id")
+		      var RelationTarget as string = self.FindRelation(RelationId).Target
+		      self.SheetRefs.add(new clWorkSheetRef(self.TempFolder, name, SheetId.ToInteger, RelationId, RelationTarget, self.TraceLoadSheetData))
+		      
+		      if self.TraceLoadSheetListInWorkbook then
+		        Writelog(CurrentMethodName,0, "Loaded sheet [" + name  + "] , id " + str(sheetId) + ".")
+		        
+		      end if
+		      
+		      if LoadMode =LoadModes.FullLoad then
+		        Self.SheetRefs(self.SheetRefs.LastIndex).LoadSheetData()
+		        
+		      end if
+		      
+		    end if
+		    
+		    x1 = x1.NextSibling
+		    
+		  wend
+		  
 		End Sub
 	#tag EndMethod
 
@@ -626,7 +743,7 @@ Protected Class clWorkbook
 		      lvl1 = lvl1+1
 		      
 		    elseif x1.name = "sheets" then
-		      LoadWorksheetsList(LoadMode, x1.FirstChild, lvl1+1)
+		      LoadListWorksheets(LoadMode, x1.FirstChild, lvl1+1)
 		      x1 = x1.NextSibling
 		      
 		    elseif x1.name = "definedNames" then
@@ -754,36 +871,6 @@ Protected Class clWorkbook
 		End Sub
 	#tag EndMethod
 
-	#tag Method, Flags = &h1
-		Protected Sub LoadWorksheetsList(LoadMode as LoadModes, XmlSheets as XMLNode, XmlLevel as integer)
-		  
-		  var x1 as xmlnode = XmlSheets
-		  var lvl1 as integer = XmlLevel
-		  
-		  while x1 <> nil 
-		    if self.TraceLoadWorkbook then  clWorkbook.WriteLog(CurrentMethodName ,lvl1, x1.name)
-		    
-		    if x1.name = "sheet" then
-		      var name as string = x1.GetAttribute("name")
-		      var sheetid as string = x1.GetAttribute("sheetId")
-		      var RelationId as String = x1.GetAttribute("r:id")
-		      var RelationTarget as string = self.FindRelation(RelationId).Target
-		      self.SheetRefs.add(new clWorkSheetRef(self.TempFolder, name, SheetId.ToInteger, RelationId, RelationTarget, self.TraceLoadSheetData))
-		      
-		      if LoadMode =LoadModes.FullLoad then
-		        Self.SheetRefs(self.SheetRefs.LastIndex).LoadSheetData()
-		        
-		      end if
-		      
-		    end if
-		    
-		    x1 = x1.NextSibling
-		    
-		  wend
-		  
-		End Sub
-	#tag EndMethod
-
 	#tag Method, Flags = &h0
 		Shared Function OpenDocument(BaseFolder as FolderItem, paramarray levels as string) As XMLDocument
 		  
@@ -801,6 +888,97 @@ Protected Class clWorkbook
 		  return new XMLDocument(fld)
 		  
 		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function TraceLoadNamedRanges() As Boolean
+		  if self.DebuggingSettings = nil then
+		    return false
+		    
+		  else
+		    return self.DebuggingSettings.TraceLoadNamedRanges
+		    
+		    
+		  end if
+		  
+		  
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function TraceLoadSharedStrings() As Boolean
+		  if self.DebuggingSettings = nil then
+		    return false
+		    
+		  else
+		    return self.DebuggingSettings.TraceLoadSharedStrings
+		    
+		  end if
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function TraceLoadSheetData() As Boolean
+		  if self.DebuggingSettings = nil then
+		    return false
+		    
+		  else
+		    return self.DebuggingSettings.TraceLoadSheetData
+		    
+		    
+		  end if
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function TraceLoadSheetListInWorkbook() As boolean
+		  if self.DebuggingSettings = nil then
+		    return false
+		    
+		  else
+		    return self.DebuggingSettings.TraceLoadSheetListInWorkbook
+		     
+		  end if
+		  
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function TraceLoadStyles() As boolean
+		  if self.DebuggingSettings = nil then
+		    return false
+		    
+		  else
+		    return self.DebuggingSettings.TraceLoadStyles
+		    
+		  end if
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function TraceLoadWorkbook() As Boolean
+		  if self.DebuggingSettings = nil then
+		    return false
+		    
+		  else
+		    return self.DebuggingSettings.TraceLoadWorkbook
+		    
+		  end if
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function TraceShowUnzippedWorkbool() As boolean
+		  if self.DebuggingSettings = nil then
+		    return false
+		    
+		  else
+		    return self.DebuggingSettings.TraceShowUnzippedWorkbool
+		    
+		  end if
 		End Function
 	#tag EndMethod
 
@@ -919,6 +1097,10 @@ Protected Class clWorkbook
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
+		DebuggingSettings As clXLSX_Debugging
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
 		ExpectedStringCount As Integer
 	#tag EndProperty
 
@@ -963,23 +1145,19 @@ Protected Class clWorkbook
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
-		TraceLoadSharedStrings As Boolean
+		zz As Boolean
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
-		TraceLoadSheetData As Boolean
+		zzz As Boolean
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
-		TraceLoadStyles As Boolean
+		zzzzz As Boolean
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
-		TraceLoadWorkbook As Boolean
-	#tag EndProperty
-
-	#tag Property, Flags = &h0
-		TraceShowUnzippedWorkbool As Boolean
+		zzzzzz As Boolean
 	#tag EndProperty
 
 
@@ -1056,7 +1234,7 @@ Protected Class clWorkbook
 			EditorType="MultiLineEditor"
 		#tag EndViewProperty
 		#tag ViewProperty
-			Name="TraceLoadSharedStrings"
+			Name="zzz"
 			Visible=false
 			Group="Behavior"
 			InitialValue=""
@@ -1064,7 +1242,7 @@ Protected Class clWorkbook
 			EditorType=""
 		#tag EndViewProperty
 		#tag ViewProperty
-			Name="TraceLoadSheetData"
+			Name="zz"
 			Visible=false
 			Group="Behavior"
 			InitialValue=""
@@ -1072,7 +1250,7 @@ Protected Class clWorkbook
 			EditorType=""
 		#tag EndViewProperty
 		#tag ViewProperty
-			Name="TraceLoadStyles"
+			Name="zzzzz"
 			Visible=false
 			Group="Behavior"
 			InitialValue=""
@@ -1080,7 +1258,7 @@ Protected Class clWorkbook
 			EditorType=""
 		#tag EndViewProperty
 		#tag ViewProperty
-			Name="TraceLoadWorkbook"
+			Name="zzzzzz"
 			Visible=false
 			Group="Behavior"
 			InitialValue=""

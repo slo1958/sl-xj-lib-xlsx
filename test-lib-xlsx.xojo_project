@@ -28,6 +28,7 @@ Folder=lib-xlsx-ui-support;lib-xlsx-ui-support;&h0000000003ACCFFF;&h000000000000
 Module=UI_Support_Methods;lib-xlsx-ui-support/UI_Support_Methods.xojo_code;&h000000003340D7FF;&h0000000003ACCFFF;false
 DesktopWindow=ccWorkbook;lib-xlsx-ui-support/ccWorkbook.xojo_window;&h000000001AA86FFF;&h0000000003ACCFFF;false
 Class=clWorkbookNamedRange;lib-xlsx/xlsx-workbook/clWorkbookNamedRange.xojo_code;&h0000000042B22FFF;&h0000000015D41FFF;false
+Class=clXLSX_Debugging;lib-xlsx/xlsx-workbook/clXLSX_Debugging.xojo_code;&h0000000027AF9FFF;&h0000000015D41FFF;false
 DefaultWindow=Window1
 AppMenuBar=MainMenuBar
 MajorVersion=1

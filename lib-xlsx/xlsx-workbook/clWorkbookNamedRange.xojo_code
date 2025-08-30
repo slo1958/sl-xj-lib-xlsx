@@ -1,10 +1,10 @@
 #tag Class
 Protected Class clWorkbookNamedRange
 	#tag Method, Flags = &h0
-		Sub Constructor(pName as string, pRange as string, pSheetLimit as string)
+		Sub Constructor(pName as string, pRange as string, pLocalSheetID as integer)
 		  self.Name = pName
 		  self.rawRange = pRange
-		  self.SheetLimit = pSheetLimit
+		  self.localSheetID = pLocalSheetID
 		  
 		  return
 		  
@@ -26,15 +26,15 @@ Protected Class clWorkbookNamedRange
 
 
 	#tag Property, Flags = &h0
+		localSheetID As integer
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
 		Name As string
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
 		rawRange As string
-	#tag EndProperty
-
-	#tag Property, Flags = &h0
-		SheetLimit As String
 	#tag EndProperty
 
 
