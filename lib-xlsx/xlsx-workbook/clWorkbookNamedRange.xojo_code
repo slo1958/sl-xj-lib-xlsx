@@ -3,7 +3,7 @@ Protected Class clWorkbookNamedRange
 	#tag Method, Flags = &h0
 		Sub Constructor(pName as string, pRange as string, pLocalSheetID as integer)
 		  self.Name = pName
-		  self.rawRange = pRange
+		  self.SourceRange = pRange
 		  self.localSheetID = pLocalSheetID
 		  
 		  return
@@ -13,13 +13,29 @@ Protected Class clWorkbookNamedRange
 
 	#tag Method, Flags = &h0
 		Function GetTargetSheetName() As string
+		  // 
+		  // var idx as integer = Name.IndexOf("!")
+		  // 
+		  // if idx <= 0 then return ""
+		  // 
+		  // return name.left(idx-1).trim
+		  // 
 		  
-		  var idx as integer = Name.IndexOf("!")
+		  return self.Translate().SheetName
 		  
-		  if idx <= 0 then return ""
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function Translate() As clRangeReference
 		  
-		  return name.left(idx-1).trim
+		  if TranslatedRange = nil then
+		    self.TranslatedRange = new clRangeReference(self.SourceRange)
+		    
+		    
+		  end if
 		  
+		  return self.TranslatedRange
 		  
 		End Function
 	#tag EndMethod
@@ -34,7 +50,11 @@ Protected Class clWorkbookNamedRange
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
-		rawRange As string
+		SourceRange As string
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
+		TranslatedRange As clRangeReference
 	#tag EndProperty
 
 
@@ -84,7 +104,23 @@ Protected Class clWorkbookNamedRange
 			Visible=false
 			Group="Behavior"
 			InitialValue=""
-			Type="Integer"
+			Type="String"
+			EditorType=""
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="localSheetID"
+			Visible=false
+			Group="Behavior"
+			InitialValue=""
+			Type="integer"
+			EditorType=""
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="SourceRange"
+			Visible=false
+			Group="Behavior"
+			InitialValue=""
+			Type="string"
 			EditorType=""
 		#tag EndViewProperty
 	#tag EndViewBehavior

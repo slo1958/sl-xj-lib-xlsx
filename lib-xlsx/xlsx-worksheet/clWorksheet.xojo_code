@@ -51,7 +51,7 @@ Protected Class clWorksheet
 		Function GetCell(A1Ref as string) As clCell
 		  var p as pair
 		  
-		  p = clCell.ExtractLocation(A1Ref)
+		  p = clCellReference.ExtractLocation(A1Ref)
 		  
 		  return self.GetCell(p.left, p.right)
 		  
@@ -87,8 +87,8 @@ Protected Class clWorksheet
 		  const cRichText as string = "is"
 		  
 		  var mycell as new clCell(basenode)
-		  
-		  var p as pair = clCell.ExtractLocation(mycell.CellLocation)
+		   
+		  var p as pair = mycell.CellLocationAsPair()
 		  
 		  self.AddCell(p.left, p.Right, mycell)
 		  
@@ -241,19 +241,19 @@ Protected Class clWorksheet
 			EditorType=""
 		#tag EndViewProperty
 		#tag ViewProperty
-			Name="FilePath()"
-			Visible=false
-			Group="Behavior"
-			InitialValue=""
-			Type="string"
-			EditorType="MultiLineEditor"
-		#tag EndViewProperty
-		#tag ViewProperty
 			Name="lastColumn"
 			Visible=false
 			Group="Behavior"
 			InitialValue=""
 			Type="Integer"
+			EditorType=""
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="Trace"
+			Visible=false
+			Group="Behavior"
+			InitialValue=""
+			Type="Boolean"
 			EditorType=""
 		#tag EndViewProperty
 	#tag EndViewBehavior

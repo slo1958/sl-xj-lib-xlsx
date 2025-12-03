@@ -192,6 +192,32 @@ Protected Module helper_functions
 		End Function
 	#tag EndMethod
 
+	#tag Method, Flags = &h0
+		Function ToString(extends p as pair) As string
+		  
+		  var tmp as string
+		  
+		  if p.left isa pair then
+		    tmp = pair(p.left).ToString
+		    
+		  else
+		    tmp = str(p.left)
+		    
+		  end if
+		  
+		  if p.Right isa pair then
+		    tmp = tmp + ":" + pair(p.Right).ToString
+		    
+		  else
+		    tmp = tmp + ":" + str(p.Right)
+		    
+		  end if
+		  
+		  return tmp
+		  
+		End Function
+	#tag EndMethod
+
 
 	#tag ViewBehavior
 		#tag ViewProperty

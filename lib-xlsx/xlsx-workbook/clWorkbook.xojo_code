@@ -447,10 +447,12 @@ Protected Class clWorkbook
 		      var range as string = x1.FirstChild.Value
 		      var localID as string = x1.GetAttribute("localSheetId")
 		      
-		      NamedRanges.Add(new clWorkbookNamedRange(name, range, localID.ToInteger))
+		      var temp as new clWorkbookNamedRange(name, range, localID.ToInteger)
 		      
+		      NamedRanges.Add(temp)
 		      
 		      if self.TraceLoadNamedRanges then
+		        if temp <> nil then Writelog(CurrentMethodName, 0, temp.SourceRange+" "+ temp.GetTargetSheetName )
 		        Writelog(CurrentMethodName,0, "Loaded name range [" + name  + "] , loaclId " + localID + ", definition [" + range + "].")
 		        
 		      end if
@@ -939,7 +941,7 @@ Protected Class clWorkbook
 		    
 		  else
 		    return self.DebuggingSettings.TraceLoadSheetListInWorkbook
-		     
+		    
 		  end if
 		  
 		  
@@ -1025,6 +1027,26 @@ Protected Class clWorkbook
 		End Sub
 	#tag EndMethod
 
+
+	#tag Note, Name = definedNames
+		
+		
+		Examples
+		
+		<definedNames>  
+		  <definedName name="NamedFormula"    comment="Comment text for defined name.">SUM(Sheet3!$B$2:$B$9)</definedName>  
+		  <definedName name="NamedRange">Sheet3!$A$1:$C$12</definedName>  
+		  <definedName name="NamedRangeFromExternalReference" localSheetId="2"     hidden="1">Sheet5!$A$1:$T$47</definedName>  
+		</definedNames>
+		
+		<definedNames>
+		  <definedName name="FMLA">Sheet1!$B$3</definedName>
+		  <definedName name="SheetLevelName" comment="This name is scoped to Sheet1" localSheetId="0">Sheet1!$B$3</definedName>
+		</definedNames>
+		
+		
+		
+	#tag EndNote
 
 	#tag Note, Name = Loading shared string
 		

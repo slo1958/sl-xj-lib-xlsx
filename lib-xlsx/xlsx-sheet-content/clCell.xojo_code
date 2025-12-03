@@ -1,6 +1,42 @@
 #tag Class
 Protected Class clCell
 	#tag Method, Flags = &h0
+		Function CellColumn() As integer
+		  
+		  if Reference = nil then
+		    return -1
+		    
+		  else
+		    Return Reference.Column
+		    
+		  end if
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function CellLocationAsPair() As pair
+		  
+		  return Reference.Location
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function CellRow() As integer
+		  
+		  if Reference = nil then
+		    return -1
+		    
+		  else
+		    Return Reference.Row
+		    
+		  end if
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Sub Constructor(baseNode as XMLNode)
 		  
 		  // Handle cell attributes
@@ -44,9 +80,11 @@ Protected Class clCell
 		  // Internals
 		  self.CellSharedStringIndex = -1
 		  
-		  var p as pair = self.ExtractLocation(self.CellLocation)
-		  self.CellRow = p.Left
-		  self.CellColumn = p.Right
+		  self.Reference = new clCellReference(self.CellLocation)
+		  
+		  // var p as pair = self.ExtractLocation(self.CellLocation)
+		  // self.CellRow = p.Left
+		  // self.CellColumn = p.Right
 		  
 		  return
 		  
@@ -55,32 +93,8 @@ Protected Class clCell
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Shared Function ExtractLocation(CellAddress as string) As pair
-		  Const colBase as string = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-		  
-		  var tmpcol as integer
-		  var tmprow as integer
-		  
-		  for i as integer = 0 to CellAddress.Length
-		    var char as string = CellAddress.Middle(i,1)
-		    
-		    var a as integer = colBase.IndexOf(char)
-		    
-		    if "A" <= char and char <= "Z" then tmpcol = tmpcol * 26 + colBase.IndexOf(char)+1
-		    if "0" <= char and char <= "9" then tmprow = tmprow*10 + char.ToInteger
-		    
-		  next
-		  
-		  return tmprow : tmpcol
-		  
-		  
-		  
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h0
 		Function GetValueAsDateTime(wb as clWorkbook) As DateTime
-		   
+		  
 		  //
 		  // Return nil if the cell has no value
 		  //
@@ -125,7 +139,7 @@ Protected Class clCell
 
 	#tag Method, Flags = &h0
 		Function GetValueAsNumber(wb as clWorkbook) As double
-		   
+		  
 		  //
 		  // Return empty string is the loaded cell value is empty
 		  //
@@ -216,7 +230,7 @@ Protected Class clCell
 
 	#tag Method, Flags = &h0
 		Function GuessType(wb as clWorkbook) As GuessedType
-		   
+		  
 		  //
 		  // Return general type if the loaded cell value is empty
 		  //
@@ -244,19 +258,19 @@ Protected Class clCell
 		    var fmt as clCellFormatter = wb.GetFormat(style.NumberFormatId)
 		    
 		    if fmt = nil then return GuessedType.General
-		     
+		    
 		    
 		    if fmt.IsDateFormat then
 		      return GuessedType.Date
 		      
 		    else
 		      return GuessedType.Number
-		       
+		      
 		      
 		      
 		    end if
 		  end if
-		   
+		  
 		  return GuessedType.General
 		  
 		  
@@ -341,19 +355,11 @@ Protected Class clCell
 
 
 	#tag Property, Flags = &h0
-		CellColumn As string
-	#tag EndProperty
-
-	#tag Property, Flags = &h0
 		CellFormula As string
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
 		CellLocation As string
-	#tag EndProperty
-
-	#tag Property, Flags = &h0
-		CellRow As Integer
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
@@ -374,6 +380,10 @@ Protected Class clCell
 
 	#tag Property, Flags = &h21
 		Private CellValue As variant
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
+		Reference As clCellReference
 	#tag EndProperty
 
 
@@ -446,14 +456,6 @@ Protected Class clCell
 			EditorType=""
 		#tag EndViewProperty
 		#tag ViewProperty
-			Name="CellColumn"
-			Visible=false
-			Group="Behavior"
-			InitialValue=""
-			Type="string"
-			EditorType="MultiLineEditor"
-		#tag EndViewProperty
-		#tag ViewProperty
 			Name="CellFormula"
 			Visible=false
 			Group="Behavior"
@@ -468,14 +470,6 @@ Protected Class clCell
 			InitialValue=""
 			Type="string"
 			EditorType="MultiLineEditor"
-		#tag EndViewProperty
-		#tag ViewProperty
-			Name="CellRow"
-			Visible=false
-			Group="Behavior"
-			InitialValue=""
-			Type="Integer"
-			EditorType=""
 		#tag EndViewProperty
 		#tag ViewProperty
 			Name="CellSharedStringIndex"
