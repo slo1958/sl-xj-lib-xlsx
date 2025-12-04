@@ -38,6 +38,16 @@ Protected Class clWorksheet
 
 	#tag Method, Flags = &h0
 		Function GetCell(row as integer, column as integer) As clCell
+		  //
+		  // Return the cell located at coordinate passed as row and column
+		  //
+		  // Parameters:
+		  // - row: row number
+		  // - column: column number
+		  //
+		  // Returns
+		  //    Cell reference or nil
+		  //
 		  
 		  if row > rows.LastIndex then return nil
 		  
@@ -49,12 +59,21 @@ Protected Class clWorksheet
 
 	#tag Method, Flags = &h0
 		Function GetCell(A1Ref as string) As clCell
+		  //
+		  // Return the cell located at coordinate passed as reference
+		  //
+		  // Parameters:
+		  // - A1Ref: coordinates, as A1 references
+		  //
+		  // Returns
+		  //    Cell reference or nil
+		  //
+		  
 		  var p as pair
 		  
 		  p = clCellReference.ExtractLocation(A1Ref)
 		  
 		  return self.GetCell(p.left, p.right)
-		  
 		  
 		End Function
 	#tag EndMethod
@@ -87,7 +106,7 @@ Protected Class clWorksheet
 		  const cRichText as string = "is"
 		  
 		  var mycell as new clCell(basenode)
-		   
+		  
 		  var p as pair = mycell.CellLocationAsPair()
 		  
 		  self.AddCell(p.left, p.Right, mycell)

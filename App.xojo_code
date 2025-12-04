@@ -3,7 +3,8 @@ Protected Class App
 Inherits DesktopApplication
 	#tag Event
 		Sub Opening()
-		  
+		  SaveWorkbook
+		  return
 		End Sub
 	#tag EndEvent
 
