@@ -57,12 +57,39 @@ Protected Module Module3
 		  addDefaultNodeToContent(xmlDoc, typesNode, "refs", "application/vnd.openxmlformats-package.relationships+xml")
 		  addDefaultNodeToContent(xmlDoc, typesNode, "bin",  "application/vnd.openxmlformats-officedocument.oleObject")
 		  
-		  addOverrideNodeToContent(xmlDoc, typesNode, "/xl/styles.xml", "application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml")
-		  addOverrideNodeToContent(xmlDoc, typesNode, "/xl/worksheets/sheet1.xml", "application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml")
-		  addOverrideNodeToContent(xmlDoc, typesNode, "/xl/workbook.xml", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml")
-		  addOverrideNodeToContent(xmlDoc, typesNode, "/docProps/core.xml", "application/vnd.openxmlformats-package.core-properties+xml")
-		  addOverrideNodeToContent(xmlDoc, typesNode, "/xl/theme/theme1.xml", "application/vnd.openxmlformats-officedocument.theme+xml")
-		  addOverrideNodeToContent(xmlDoc, typesNode, "/docProps/app.xml",  "application/vnd.openxmlformats-officedocument.extended-properties+xml")
+		  var uc as clFileTypeInfo 
+		  var ac() as clFileTypeInfo
+		  
+		  uc = clFileTypeInfo.GetFirstEntry(clFileTypeInfo.ContentTypes.core)
+		  addOverrideNodeToContent(xmlDoc, typesNode, uc.FilePath, uc.ContentType) 
+		  
+		  
+		  uc = clFileTypeInfo.GetFirstEntry(clFileTypeInfo.ContentTypes.app)
+		  addOverrideNodeToContent(xmlDoc, typesNode, uc.FilePath, uc.ContentType) 
+		  
+		  uc = clFileTypeInfo.GetFirstEntry(clFileTypeInfo.ContentTypes.sharedStrings)
+		  addOverrideNodeToContent(xmlDoc, typesNode, uc.FilePath, uc.ContentType) 
+		  
+		  ac = clFileTypeInfo.GetAllEntries(clFileTypeInfo.ContentTypes.style)
+		  for each c as clFileTypeInfo in ac
+		    addOverrideNodeToContent(xmlDoc, typesNode, c.FilePath, uc.ContentType) 
+		    
+		  next
+		  
+		  uc = clFileTypeInfo.GetFirstEntry(clFileTypeInfo.ContentTypes.theme)
+		  addOverrideNodeToContent(xmlDoc, typesNode, uc.FilePath, uc.ContentType) 
+		  
+		  uc = clFileTypeInfo.GetFirstEntry(clFileTypeInfo.ContentTypes.workbook)
+		  addOverrideNodeToContent(xmlDoc, typesNode, uc.FilePath, uc.ContentType) 
+		  
+		  // Add worksheets
+		  ac = clFileTypeInfo.GetAllEntries(clFileTypeInfo.ContentTypes.worksheet)
+		  
+		  for each c as clFileTypeInfo in ac
+		    addOverrideNodeToContent(xmlDoc, typesNode, c.FilePath, uc.ContentType) 
+		    
+		  next
+		  
 		  
 		  xmlDoc.SaveXML(targetFolder.Child(filename))
 		  
@@ -77,6 +104,9 @@ Protected Module Module3
 		  saveTemplate(targetFolder, "app.xml", template_app)
 		  
 		  saveTemplate(targetFolder, "core.xml", template_core)
+		  
+		   
+		  // add suport for custom
 		  
 		  return
 		  
@@ -151,6 +181,8 @@ Protected Module Module3
 		  if baseFolder.Exists then baseFolder.RemoveFolderAndContents
 		  
 		  
+		  // 
+		  clFileTypeInfo.Initialize()
 		  
 		  baseFolder = MakeFolder(baseFolder)
 		  // 
@@ -185,6 +217,63 @@ Protected Module Module3
 		  
 		  
 		  
+		  
+		  
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub saveWorkbookRel()
+		  
+		  // <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+		  // <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+		  // <Relationship Id="rId9" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"></Relationship>
+		  // <Relationship Id="rId8" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings" Target="sharedStrings.xml"></Relationship>
+		  // <Relationship Id="rId7" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme" Target="theme/theme1.xml"></Relationship>
+		  // <Relationship Id="rId6" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet6.xml"></Relationship>
+		  // <Relationship Id="rId5" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet5.xml"></Relationship>
+		  // <Relationship Id="rId4" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet4.xml"></Relationship>
+		  // <Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet3.xml"></Relationship>
+		  // <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet2.xml"></Relationship>
+		  // <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"></Relationship>
+		  // </Relationships>
+		  
+		  
+		  const filename as string = "workbook.xml.rels"
+		  
+		  
+		  
+		  var xmlDoc as new XMLDocument()
+		  
+		  Var topNode As XmlNode
+		  topNode = xmlDoc.AppendChild(xmlDoc.CreateElement("Relationships"))
+		  topNode.SetAttribute("xmlns", "http://schemas.openxmlformats.org/package/2006/relationships")
+		  
+		  
+		  var subNode as XmlNode
+		  var ac() as clFileTypeInfo
+		  
+		  
+		  ac = clFileTypeInfo.GetAllEntries(clFileTypeInfo.ContentTypes.style)
+		  for each c as clFileTypeInfo in ac 
+		    
+		    
+		    subNode = topNode.AppendChild(xmlDoc.CreateElement("Relationship"))
+		    subNode.SetAttribute("Id", c.RelationShipID)
+		    subNode.SetAttribute("Type", c.RelationType)
+		    subNode.SetAttribute("Target", c.FilePath(1))
+		    
+		    
+		  next
+		  
+		  
+		  var styleFileName as string = "styles.xml"
+		  
+		  
+		  subNode = topNode.AppendChild(xmlDoc.CreateElement("Relationship"))
+		  subNode.SetAttribute("Id", "XXX")
+		  subNode.SetAttribute("Type","http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles")
+		  subNode.SetAttribute("Target", styleFileName)
 		  
 		  
 		End Sub

@@ -508,7 +508,7 @@ Protected Class clWorkbook
 		  
 		  self.SharedStrings = new Dictionary
 		  
-		  var SharedStringXML as XMLDocument = self.OpenDocument(self.TempFolder, "xl","sharedStrings.xml")
+		  var SharedStringXML as XMLDocument = self.OpenXMLDocument(self.TempFolder, "xl","sharedStrings.xml")
 		  
 		  if SharedStringXML = nil then Return
 		  
@@ -636,7 +636,7 @@ Protected Class clWorkbook
 		Protected Sub LoadStyles()
 		  
 		  
-		  var StyleXml as XMLDocument = self.OpenDocument(self.TempFolder, "xl","styles.xml")
+		  var StyleXml as XMLDocument = self.OpenXMLDocument(self.TempFolder, "xl","styles.xml")
 		  
 		  if StyleXml = nil then 
 		    self.Writelog(CurrentMethodName,-1,"Cannot find <styles.xml>")
@@ -724,7 +724,7 @@ Protected Class clWorkbook
 		  // (nothing)
 		  //
 		  
-		  var WorkbookXML as XMLDocument = self.OpenDocument(self.TempFolder, "xl","workbook.xml")
+		  var WorkbookXML as XMLDocument = self.OpenXMLDocument(self.TempFolder, "xl","workbook.xml")
 		  
 		  if WorkbookXML = nil then 
 		    self.Writelog(CurrentMethodName,-1,"Cannot find <workbook.xml>")
@@ -779,7 +779,7 @@ Protected Class clWorkbook
 		  // (nothing)
 		  //
 		  
-		  var WorkbookXML as XMLDocument = self.OpenDocument(self.TempFolder, "xl","workbook.xml")
+		  var WorkbookXML as XMLDocument = self.OpenXMLDocument(self.TempFolder, "xl","workbook.xml")
 		  
 		  if WorkbookXML = nil then 
 		    self.Writelog(CurrentMethodName,-1,"Cannot find <workbook.xml>")
@@ -834,7 +834,7 @@ Protected Class clWorkbook
 		  
 		  
 		  
-		  var WorkbookRelXML as XMLDocument = self.OpenDocument(self.TempFolder, "xl","_rels","workbook.xml.rels")
+		  var WorkbookRelXML as XMLDocument = self.OpenXMLDocument(self.TempFolder, "xl","_rels","workbook.xml.rels")
 		  
 		  if WorkbookRelXML = nil then 
 		    self.Writelog(CurrentMethodName,-1,"Cannot find <workbook.xml.rels>")
@@ -874,7 +874,7 @@ Protected Class clWorkbook
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Shared Function OpenDocument(BaseFolder as FolderItem, paramarray levels as string) As XMLDocument
+		Shared Function OpenXMLDocument(BaseFolder as FolderItem, paramarray levels as string) As XMLDocument
 		  
 		  if BaseFolder = nil then return nil
 		  
