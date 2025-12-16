@@ -43,7 +43,7 @@ Begin DesktopContainer ccWorkbook
       LockRight       =   False
       LockTop         =   True
       Scope           =   0
-      SelectedRowIndex=   0
+      SelectedRowIndex=   -1
       TabIndex        =   0
       TabPanelIndex   =   0
       TabStop         =   True
@@ -174,7 +174,7 @@ End
 		Sub UseWorkbook(workbook as clWorkbook)
 		  self.MyWorkbook = workbook
 		  
-		  lbl_Filename.Text = workbook.SourceFile.Name
+		  lbl_Filename.Text = workbook.GetSourceFileName
 		  
 		  SheetsToPopup(self.MyWorkbook, PopupMenu1)
 		  
@@ -194,8 +194,8 @@ End
 		Sub SelectionChanged(item As DesktopMenuItem)
 		  
 		  SheetToListBox( self.MyWorkbook, me.SelectedRowText, Listbox1)
-		   
-		   
+		  
+		  
 		End Sub
 	#tag EndEvent
 #tag EndEvents

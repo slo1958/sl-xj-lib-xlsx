@@ -1,13 +1,13 @@
 #tag Class
-Protected Class clWorkSheetRef
+Protected Class clWorksheetRef
 	#tag Method, Flags = &h0
 		Sub Constructor(SourceFolder as folderitem, SheetName as string, SheetId as integer, SheetRelationId as string, SheetRelationTarget as string, TraceFlag as Boolean)
 		  
 		  self.TempFolder = SourceFolder
 		  self.name = SheetName
 		  self.id = SheetId
-		  self.RelationId = SheetRelationId
-		  self.RelationTarget = SheetRelationTarget
+		  self.RelationId = SheetRelationId 
+		  self.RelationTarget = SheetRelationTarget // Could be removed and calculated in LoadSheetData()
 		  self.SheetData = nil
 		  self.Trace = TraceFlag
 		  
@@ -23,10 +23,10 @@ Protected Class clWorkSheetRef
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function GetSheetData() As clWorksheet
+		Function GetSheetData(WorkbookInformation as clWorkbookInformation) As clWorksheet
 		  
 		  if not IsLoaded then
-		    self.LoadSheetData()
+		    self.LoadSheetData(WorkbookInformation)
 		    
 		  end if
 		  
@@ -43,10 +43,10 @@ Protected Class clWorkSheetRef
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub LoadSheetData()
+		Sub LoadSheetData(WorkbookInformation as clWorkbookInformation)
 		  
 		  
-		  self.SheetData = new clWorksheet(TempFolder, Name, RelationTarget, self.Trace)
+		  self.SheetData = new clWorksheet(TempFolder, Name, RelationTarget, WorkbookInformation, self.Trace)
 		  
 		  return 
 		End Sub
@@ -128,7 +128,39 @@ Protected Class clWorkSheetRef
 			Visible=false
 			Group="Behavior"
 			InitialValue=""
+			Type="String"
+			EditorType=""
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="Id"
+			Visible=false
+			Group="Behavior"
+			InitialValue=""
 			Type="Integer"
+			EditorType=""
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="RelationId"
+			Visible=false
+			Group="Behavior"
+			InitialValue=""
+			Type="string"
+			EditorType=""
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="RelationTarget"
+			Visible=false
+			Group="Behavior"
+			InitialValue=""
+			Type="string"
+			EditorType=""
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="Trace"
+			Visible=false
+			Group="Behavior"
+			InitialValue=""
+			Type="Boolean"
 			EditorType=""
 		#tag EndViewProperty
 	#tag EndViewBehavior

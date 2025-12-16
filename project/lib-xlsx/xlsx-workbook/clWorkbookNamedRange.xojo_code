@@ -3,7 +3,7 @@ Protected Class clWorkbookNamedRange
 	#tag Method, Flags = &h0
 		Sub Constructor(pName as string, pRange as string, pLocalSheetID as integer)
 		  self.Name = pName
-		  self.SourceRange = pRange
+		  self.SourceRangeV = pRange
 		  self.localSheetID = pLocalSheetID
 		  
 		  return
@@ -27,6 +27,13 @@ Protected Class clWorkbookNamedRange
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Function SourceRange() As string
+		  return self.SourceRangeV
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Function Translate() As clRangeReference
 		  
 		  if TranslatedRange = nil then
@@ -41,20 +48,20 @@ Protected Class clWorkbookNamedRange
 	#tag EndMethod
 
 
-	#tag Property, Flags = &h0
-		localSheetID As integer
+	#tag Property, Flags = &h1
+		Protected localSheetID As integer
 	#tag EndProperty
 
-	#tag Property, Flags = &h0
-		Name As string
+	#tag Property, Flags = &h1
+		Protected Name As string
 	#tag EndProperty
 
-	#tag Property, Flags = &h0
-		SourceRange As string
+	#tag Property, Flags = &h1
+		Protected SourceRangeV As string
 	#tag EndProperty
 
-	#tag Property, Flags = &h0
-		TranslatedRange As clRangeReference
+	#tag Property, Flags = &h1
+		Protected TranslatedRange As clRangeReference
 	#tag EndProperty
 
 
@@ -116,12 +123,12 @@ Protected Class clWorkbookNamedRange
 			EditorType=""
 		#tag EndViewProperty
 		#tag ViewProperty
-			Name="SourceRange"
+			Name="SourceRangeV"
 			Visible=false
 			Group="Behavior"
 			InitialValue=""
 			Type="string"
-			EditorType=""
+			EditorType="MultiLineEditor"
 		#tag EndViewProperty
 	#tag EndViewBehavior
 End Class

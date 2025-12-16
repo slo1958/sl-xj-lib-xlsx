@@ -42,7 +42,7 @@ Protected Module Module3
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub saveContentFile(targetFolder as FolderItem)
+		Sub saveContentFile(targetFolder as FolderItem, fileInfo as clFileRelations)
 		  const filename as string = "[Content_Types].xml"
 		  
 		  var xmlDoc as new XMLDocument()
@@ -57,36 +57,36 @@ Protected Module Module3
 		  addDefaultNodeToContent(xmlDoc, typesNode, "refs", "application/vnd.openxmlformats-package.relationships+xml")
 		  addDefaultNodeToContent(xmlDoc, typesNode, "bin",  "application/vnd.openxmlformats-officedocument.oleObject")
 		  
-		  var uc as clFileTypeInfo 
-		  var ac() as clFileTypeInfo
+		  var uc as clFileRelationEntry 
+		  var ac() as clFileRelationEntry
 		  
-		  uc = clFileTypeInfo.GetFirstEntry(clFileTypeInfo.ContentTypes.core)
-		  addOverrideNodeToContent(xmlDoc, typesNode, uc.FilePath, uc.ContentType) 
+		  uc = fileInfo.GetFirstEntry(clFileRelationEntry.ContentTypes.core)
+		  addOverrideNodeToContent(xmlDoc, typesNode, uc.TypePartPath, uc.ContentType) 
 		  
 		  
-		  uc = clFileTypeInfo.GetFirstEntry(clFileTypeInfo.ContentTypes.app)
-		  addOverrideNodeToContent(xmlDoc, typesNode, uc.FilePath, uc.ContentType) 
+		  uc = fileInfo.GetFirstEntry(clFileRelationEntry.ContentTypes.app)
+		  addOverrideNodeToContent(xmlDoc, typesNode, uc.TypePartPath, uc.ContentType) 
 		  
-		  uc = clFileTypeInfo.GetFirstEntry(clFileTypeInfo.ContentTypes.sharedStrings)
-		  addOverrideNodeToContent(xmlDoc, typesNode, uc.FilePath, uc.ContentType) 
+		  uc = fileInfo.GetFirstEntry(clFileRelationEntry.ContentTypes.sharedStrings)
+		  addOverrideNodeToContent(xmlDoc, typesNode, uc.TypePartPath, uc.ContentType) 
 		  
-		  ac = clFileTypeInfo.GetAllEntries(clFileTypeInfo.ContentTypes.style)
-		  for each c as clFileTypeInfo in ac
-		    addOverrideNodeToContent(xmlDoc, typesNode, c.FilePath, uc.ContentType) 
+		  ac = fileInfo.GetAllEntries(clFileRelationEntry.ContentTypes.style)
+		  for each c as clFileRelationEntry in ac
+		    addOverrideNodeToContent(xmlDoc, typesNode, c.TypePartPath, uc.ContentType) 
 		    
 		  next
 		  
-		  uc = clFileTypeInfo.GetFirstEntry(clFileTypeInfo.ContentTypes.theme)
-		  addOverrideNodeToContent(xmlDoc, typesNode, uc.FilePath, uc.ContentType) 
+		  uc = fileInfo.GetFirstEntry(clFileRelationEntry.ContentTypes.theme)
+		  addOverrideNodeToContent(xmlDoc, typesNode, uc.TypePartPath, uc.ContentType) 
 		  
-		  uc = clFileTypeInfo.GetFirstEntry(clFileTypeInfo.ContentTypes.workbook)
-		  addOverrideNodeToContent(xmlDoc, typesNode, uc.FilePath, uc.ContentType) 
+		  uc = fileInfo.GetFirstEntry(clFileRelationEntry.ContentTypes.workbook)
+		  addOverrideNodeToContent(xmlDoc, typesNode, uc.TypePartPath, uc.ContentType) 
 		  
 		  // Add worksheets
-		  ac = clFileTypeInfo.GetAllEntries(clFileTypeInfo.ContentTypes.worksheet)
+		  ac = fileInfo.GetAllEntries(clFileRelationEntry.ContentTypes.worksheet)
 		  
-		  for each c as clFileTypeInfo in ac
-		    addOverrideNodeToContent(xmlDoc, typesNode, c.FilePath, uc.ContentType) 
+		  for each c as clFileRelationEntry in ac
+		    addOverrideNodeToContent(xmlDoc, typesNode, c.TypePartPath, uc.ContentType) 
 		    
 		  next
 		  
@@ -105,7 +105,7 @@ Protected Module Module3
 		  
 		  saveTemplate(targetFolder, "core.xml", template_core)
 		  
-		   
+		  
 		  // add suport for custom
 		  
 		  return
@@ -180,9 +180,9 @@ Protected Module Module3
 		  
 		  if baseFolder.Exists then baseFolder.RemoveFolderAndContents
 		  
-		  
 		  // 
-		  clFileTypeInfo.Initialize()
+		  fileInfo = new clFileRelations
+		  fileInfo.Initialize
 		  
 		  baseFolder = MakeFolder(baseFolder)
 		  // 
@@ -208,7 +208,7 @@ Protected Module Module3
 		  saveSharedStrings(worksheetBaseFolder)
 		  
 		  // Update folderTOC - called at the end
-		  saveContentFile(baseFolder)
+		  saveContentFile(baseFolder, fileInfo)
 		  
 		  
 		  // Show in Finder
@@ -223,7 +223,7 @@ Protected Module Module3
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub saveWorkbookRel()
+		Sub saveWorkbookRel(fileInfo as clFileRelations)
 		  
 		  // <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 		  // <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
@@ -251,17 +251,17 @@ Protected Module Module3
 		  
 		  
 		  var subNode as XmlNode
-		  var ac() as clFileTypeInfo
+		  var ac() as clFileRelationEntry
 		  
 		  
-		  ac = clFileTypeInfo.GetAllEntries(clFileTypeInfo.ContentTypes.style)
-		  for each c as clFileTypeInfo in ac 
+		  ac = fileInfo.GetAllEntries(clFileRelationEntry.ContentTypes.style)
+		  for each c as clFileRelationEntry in ac 
 		    
 		    
 		    subNode = topNode.AppendChild(xmlDoc.CreateElement("Relationship"))
 		    subNode.SetAttribute("Id", c.RelationShipID)
-		    subNode.SetAttribute("Type", c.RelationType)
-		    subNode.SetAttribute("Target", c.FilePath(1))
+		    subNode.SetAttribute("Type", c.RelationshipType)
+		    subNode.SetAttribute("Target", c.RelationPath)
 		    
 		    
 		  next
@@ -306,6 +306,11 @@ Protected Module Module3
 		
 		
 	#tag EndNote
+
+
+	#tag Property, Flags = &h0
+		fileInfo As clFileRelations
+	#tag EndProperty
 
 
 	#tag ViewBehavior

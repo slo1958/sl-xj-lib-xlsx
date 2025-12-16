@@ -21,7 +21,7 @@ Protected Class clWorksheet
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub Constructor(WorkFolder as folderItem, SheetName as string, SheetFilePath as string, TraceLoad as Boolean)
+		Sub Constructor(WorkFolder as folderItem, SheetName as string, SheetFilePath as string, WorkbookInformation as clWorkbookInformation, TraceLoad as Boolean)
 		  
 		  self.Name = SheetName
 		  
@@ -30,6 +30,8 @@ Protected Class clWorksheet
 		  self.SourceFolder = WorkFolder
 		  
 		  Self.Trace = TraceLoad
+		  
+		  self.Information = WorkbookInformation
 		  
 		  self.LoadWorksheetInfo
 		  
@@ -195,6 +197,10 @@ Protected Class clWorksheet
 
 	#tag Property, Flags = &h0
 		FilePath() As string
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
+		Information As clWorkbookInformation
 	#tag EndProperty
 
 	#tag Property, Flags = &h0

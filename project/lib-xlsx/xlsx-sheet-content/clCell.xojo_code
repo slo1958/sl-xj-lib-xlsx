@@ -47,6 +47,7 @@ Protected Class clCell
 		  // An A1 style reference to the location of this cell
 		  self.CellLocation =  basenode.GetAttribute("r")
 		  
+		  System.DebugLog("clCell location " + self.CellLocation)
 		  
 		  // The index of this cell's style. Style records are stored in the Styles Part.
 		  // The possible values for this attribute are defined by the W3C XML Schema unsignedInt datatype.
@@ -79,6 +80,13 @@ Protected Class clCell
 		  
 		  // Internals
 		  self.CellSharedStringIndex = -1
+		  
+		  if self.CellLocation.IndexOf("$") >= 0 then
+		    System.DebugLog("Error in location " + self.CellLocation)
+		    
+		  else
+		    
+		  end if
 		  
 		  self.Reference = new clCellReference(self.CellLocation)
 		  
