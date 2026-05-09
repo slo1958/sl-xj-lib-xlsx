@@ -101,6 +101,35 @@ Protected Class clCell
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Function GetValue(wb as clWorkbook) As variant
+		   
+		  //
+		  // Return nil if the cell has no value
+		  //
+		  
+		  if self.CellSourceValue.trim.Length = 0 then return nil
+		  
+		  //
+		  // String or shared string ?
+		  //
+		  select case self.CellType
+		    
+		  case  TypeSharedString  
+		    return wb.GetSharedString(CellSharedStringIndex)
+		    
+		  case TypeFormulaString, TypeInlineString
+		    return self.CellSourceValue
+		    
+		  end select
+		  
+		  //
+		  // Could be date or number
+		  //
+		  return self.CellValue
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Function GetValueAsDateTime(wb as clWorkbook) As DateTime
 		  
 		  //
