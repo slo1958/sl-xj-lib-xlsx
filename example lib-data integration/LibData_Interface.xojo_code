@@ -1,5 +1,5 @@
 #tag Module
-Protected Module Module1
+Protected Module LibData_Interface
 	#tag Method, Flags = &h0
 		Function WorksheetToTable(Workbook as clWorkbook, SheetName as string, columnsHaveHeader as Boolean) As clDataTable
 		  //
