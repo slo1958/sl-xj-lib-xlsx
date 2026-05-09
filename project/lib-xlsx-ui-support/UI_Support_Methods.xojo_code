@@ -16,8 +16,6 @@ Protected Module UI_Support_Methods
 
 	#tag Method, Flags = &h0
 		Sub SheetToListBox(Workbook as clWorkbook, SheetName as string, targetListbox as DesktopListBox)
-		  Const colBase as string = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-		  
 		  
 		  var sheet as clWorksheet =  Workbook.GetSheetFromName(SheetName)
 		  
@@ -30,7 +28,7 @@ Protected Module UI_Support_Methods
 		  targetListbox.HeaderAt(0) = "#"
 		  
 		  for i as integer= 1 to sheet.lastColumn + 1
-		    targetListbox.HeaderAt(i) = colBase.Middle(i-1,1)
+		    targetListbox.HeaderAt(i) = clCellReference.GetColumnLabel(i)
 		    
 		  next
 		  

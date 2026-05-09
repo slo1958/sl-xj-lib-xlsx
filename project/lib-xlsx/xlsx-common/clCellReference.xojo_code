@@ -11,6 +11,10 @@ Protected Class clCellReference
 
 	#tag Method, Flags = &h0
 		Shared Function ExtractLocation(CellAddress as string) As pair
+		  //
+		  // Extract the row and column number, ignore the 'absolute' mark
+		  //
+		  
 		  Const colBase as string = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 		  
 		  var tmpcol as integer
@@ -34,7 +38,38 @@ Protected Class clCellReference
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Shared Function GetColumnLabel(ColumnNumber as integer) As string
+		  Const colBase as string = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+		  
+		  //
+		  // Convert the column number to column label
+		  //
+		  var tmp as string
+		  
+		  var tmpcol as integer = ColumnNumber
+		  
+		  while tmpcol > 0
+		    var rz as integer = tmpcol - (tmpcol \ 26) * 26
+		    
+		    tmp = colBase.Middle(rz-1,1) + tmp
+		    
+		    tmpcol = tmpcol  - rz 
+		    
+		    tmpcol = tmpcol / 26
+		    
+		  wend
+		  
+		  Return tmp
+		  
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Function Location() As pair
+		  //
+		  // Return the coordinate of the cell as a pair
+		  //
 		  
 		  return self.Row:self.Column
 		  
@@ -126,32 +161,22 @@ Protected Class clCellReference
 		  
 		  return 0
 		  
-		   
+		  
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
 		Function ToString() As string
-		  Const colBase as string = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+		  //
+		  // return the coordinate of the cell as a 'A1' string
+		  //
 		  
 		  var tmp as string
 		  
 		  if self.Column > -1 then
 		    
-		    
-		    var tmpcol as integer = self.Column
-		    
-		    while tmpcol > 0
-		      var rz as integer = tmpcol - (tmpcol \ 26) * 26
-		      
-		      tmp = colBase.Middle(rz-1,1) + tmp
-		      
-		      tmpcol = tmpcol  - rz 
-		      
-		      tmpcol = tmpcol / 26
-		      
-		    wend
-		    
+		    tmp = GetColumnLabel(self.column)
+		     
 		    if self.ColumnAbsolute then tmp = "$" + tmp 
 		    
 		  end if
@@ -241,6 +266,46 @@ Protected Class clCellReference
 			Group="Behavior"
 			InitialValue=""
 			Type="Integer"
+			EditorType=""
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="Column"
+			Visible=false
+			Group="Behavior"
+			InitialValue=""
+			Type="Integer"
+			EditorType=""
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="ColumnAbsolute"
+			Visible=false
+			Group="Behavior"
+			InitialValue=""
+			Type="Boolean"
+			EditorType=""
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="RowAbsolute"
+			Visible=false
+			Group="Behavior"
+			InitialValue=""
+			Type="Boolean"
+			EditorType=""
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="ScanErrorAt"
+			Visible=false
+			Group="Behavior"
+			InitialValue=""
+			Type="Integer"
+			EditorType=""
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="SourceValue"
+			Visible=false
+			Group="Behavior"
+			InitialValue=""
+			Type="string"
 			EditorType=""
 		#tag EndViewProperty
 	#tag EndViewBehavior
