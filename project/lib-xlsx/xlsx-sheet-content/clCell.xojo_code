@@ -102,7 +102,7 @@ Protected Class clCell
 
 	#tag Method, Flags = &h0
 		Function GetValue(wb as clWorkbook) As variant
-		   
+		  
 		  //
 		  // Return nil if the cell has no value
 		  //
@@ -387,6 +387,56 @@ Protected Class clCell
 		Source
 		
 		https://schemas.liquid-technologies.com/officeopenxml/2006/?page=st_celltype.html
+		
+		
+		b : boolean
+		n : number
+		e : error
+		s : Shared string
+		str: string
+		inline str: inlineStr
+		
+		
+		
+		Note:
+		
+		<xsd:simpleType name="ST_CellType">
+		    <xsd:annotation>
+		        <xsd:documentation>Cell Type</xsd:documentation>
+		    </xsd:annotation>
+		    <xsd:restriction base="xsd:string">
+		        <xsd:enumeration value="b">
+		            <xsd:annotation>
+		                <xsd:documentation>Boolean</xsd:documentation>
+		            </xsd:annotation>
+		        </xsd:enumeration>
+		        <xsd:enumeration value="n">
+		            <xsd:annotation>
+		                <xsd:documentation>Number</xsd:documentation>
+		            </xsd:annotation>
+		        </xsd:enumeration>
+		        <xsd:enumeration value="e">
+		            <xsd:annotation>
+		                <xsd:documentation>Error</xsd:documentation>
+		            </xsd:annotation>
+		        </xsd:enumeration>
+		        <xsd:enumeration value="s">
+		            <xsd:annotation>
+		                <xsd:documentation>Shared String</xsd:documentation>
+		            </xsd:annotation>
+		        </xsd:enumeration>
+		        <xsd:enumeration value="str">
+		            <xsd:annotation>
+		                <xsd:documentation>String</xsd:documentation>
+		            </xsd:annotation>
+		        </xsd:enumeration>
+		        <xsd:enumeration value="inlineStr">
+		            <xsd:annotation>
+		                <xsd:documentation>Inline String</xsd:documentation>
+		            </xsd:annotation>
+		        </xsd:enumeration>
+		    </xsd:restriction>
+		</xsd:simpleType>
 		
 	#tag EndNote
 
